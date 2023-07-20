@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'swan_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'c2061292c',
+        'NAME': 'dev_security_db',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',

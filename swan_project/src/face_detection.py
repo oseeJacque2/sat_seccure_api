@@ -1,0 +1,81 @@
+import cv2
+import numpy as np
+from PIL import Image
+
+
+#Detect face from image function
+def detect_face(image):
+    """Detects a face in an image and flips the image with the framed face.
+
+    Args:
+        image (numpy.array): Enter Image
+
+    Returns:
+        numpy.array: Image with the framed face
+    """
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
+    faces = face_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    if len(faces) == 0:
+        print("No face detect")
+        return None
+    elif len(faces) > 1:
+        print("We are detecting more than two face")
+        return []
+    else:
+        (x, y, w, h) = faces[0]
+        face_roi = image[y:y + h, x:x + w]
+        return face_roi
+
+  
+    
+#Emotion detector 
+def get_emotion(image):
+    """This function allow to get emotion from image
+
+    Args:
+        image (numpy.array): Image whixch will be analyze
+
+    Returns:
+        _type_: _description_
+    """
+    detected_face = detect_face(image)
+
+    if detected_face is None:
+        return None
+
+    face_roi = cv2.resize(detected_face, (48, 48))
+    face_roi = np.expand_dims(face_roi, axis=0)
+    face_roi = np.expand_dims(face_roi, axis=-1)
+
+    emotion_labels = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
+
+    model = cv2.dnn.readNetFromTensorflow('emotion_detection_model.pb')
+
+    model.setInput(face_roi)
+    emotion_predictions = model.forward()
+
+    emotion_index = np.argmax(emotion_predictions)
+    emotion_label = emotion_labels[emotion_index]
+
+    return emotion_label
+
+
+#Convert image to Numpy _array
+def convert_image_to_numpy_array(image_path):
+    """This function allow to convert image to numpy table
+
+    Args:
+        image_path (String):The path of the image
+
+    Returns:
+        numpy.array: numpy.array from image
+    """
+    pil_image = Image.open(image_path).convert("L")
+    image_array = np.array(pil_image, "uint8")
+    return image_array
+
+
+#print(get_emotion(convert_image_to_numpy_array("./person/colere.jpg")))
+
+#print(detect_face(convert_image_to_numpy_array("./person/jacques/2.jpg")))

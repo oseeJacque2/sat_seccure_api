@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import Custom_User
 class UserModelAdmin(BaseUserAdmin):
 
     # The fields to be used in displaying the User model.
@@ -27,4 +27,4 @@ class UserModelAdmin(BaseUserAdmin):
     ordering = ('id', 'email',)
     filter_horizontal = ()
 
-    admin.site.register(User)
+    admin.site.register(Custom_User)

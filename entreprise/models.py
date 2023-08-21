@@ -8,7 +8,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils import timezone
 
-from account.models import User
+from account.models import Custom_User
 
 continent_choices = [
     ('AFRIQUE', 'Afrique'),
@@ -66,23 +66,24 @@ class Role(models.Model):
 
 class Enterprise(models.Model):
     __metaclass__ = ModelBasic
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     ifu = models.CharField(max_length=255, default=" ")
-    rccm = models.CharField(max_length=255, default=" ")
-    dirrector_card_id = models.CharField(max_length=255, default=" ")
-    dirrector_card_file = models.ImageField(default='default.png')
-    dirrector_card_type = models.CharField(max_length=255, choices=CARD_TYPES, default='CNI')
+    rcm = models.CharField(max_length=255, default=" ")
+    director_card_id = models.CharField(max_length=255, default=" ")
+    director_card_file = models.ImageField(default='default.png', upload_to='statics/')
+    director_card_type = models.CharField(max_length=255, choices=CARD_TYPES, default='CNI')
     director_lastname = models.CharField(max_length=255, default="String")
     director_firstname = models.CharField(max_length=255, default="String")
     is_approved = models.BooleanField(default=False)
-    logo = models.ImageField(default='default.png')
+    logo = models.ImageField(default='default.png', upload_to='statics/')
+    status = models.IntegerField(default=0)
     description = models.CharField(max_length=255, default='String')
-    request_to_use = models.CharField(max_length=255, default= " ")
+    request_to_use = models.CharField(max_length=255, default=" ")
     country = models.ForeignKey(Country, on_delete=models.CASCADE, default=1)
+
     def __str__(self):
         return f"{self.name}"
-
 
 
 
@@ -90,7 +91,7 @@ class Enterprise(models.Model):
 
 class EnterpriseAdmin(models.Model):
     __metaclass__ = ModelBasic
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     job = models.CharField(max_length=100)
     job_description = models.CharField(max_length=100)
@@ -99,8 +100,6 @@ class EnterpriseAdmin(models.Model):
 
     def __str__(self):
         return f"{self.user}"
-
-
 
 
 ################################# Entreprise admin rôle     ################################"
@@ -112,17 +111,19 @@ class EnterpriseAdminRole(models.Model):
     entreprise_admin = models.ForeignKey(EnterpriseAdmin, on_delete=models.CASCADE)
 
     def __str__(self):
-        return None
+        return f"{self.role}"
 
 
 ##########################  class Employee  ##################################
 class Employee(models.Model):
     __metaclass__ = ModelBasic
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.OneToOneField(Custom_User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
+
 
     def __str__(self):
-        return None
+        return f"{self.user}"
 
 
 ################################# Class Qr  ############################
@@ -131,11 +132,11 @@ class Qr(models.Model):
     __metaclass__ = ModelBasic
     is_current = models.BooleanField(default=False)
     qr_code = models.CharField(max_length=255)
-    qr_image = models.ImageField(default="default.png")
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE )
+    qr_image = models.ImageField(default="default.png", upload_to='statics/')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
 
     def __str__(self):
-        return None
+        return self.qr_code
 
 
 
@@ -152,7 +153,7 @@ class Face(models.Model):
     __metaclass__ = ModelBasic
     is_main = models.BooleanField(default=False)
     status = models.BooleanField(default=False)
-    face_file = models.ImageField(default="default.png")
+    face_file = models.ImageField(default="default.png", upload_to='statics/')
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -168,11 +169,11 @@ class Room(models.Model):
     check_security_code = models.BooleanField(default=False)
     enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
 
-
     def __str__(self):
         return f"{self.designation}"
 
-############################# class Employee Room
+
+############################# class Employee Room ###################################################
 class EmployeeRoom(models.Model):
     __metaclass__ = ModelBasic
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -190,4 +191,7 @@ class EmployeeStatusLog(models.Model):
 
     def __str__(self):
         return f"{self.employee_log}"
+
+
+
 

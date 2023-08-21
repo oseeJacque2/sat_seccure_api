@@ -5,9 +5,11 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import User
+from .models import Custom_User
 from .utils import Util
 from django.core.mail import send_mail
+
+from admins.models import SystemAdmin
 
 
 #User  serializer
@@ -17,7 +19,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     password2 = serializers.CharField(style={'input_type': "password"}, write_only=True)
     class Meta:
-        model = User
+        model = Custom_User
         fields = ["lastname", "firstname", 'email', "telephone", "password", "password2"]
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -40,7 +42,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         :return:  User
         """
         password = validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
+        user = Custom_User.objects.create_user(**validated_data)
         return user
 
 
@@ -51,7 +53,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
     """
     email = serializers.EmailField(max_length=255)
     class Meta:
-        model = User
+        model = Custom_User
         fields = ["email", "password"]
 
 
@@ -70,11 +72,18 @@ class UserChangePasswordSerializer(serializers.Serializer):
         password = attrs.get('password')
         password2 = attrs.get("password2")
         user = self.context.get('user')
-        if password != password2:
-            raise serializers.ValidationError("Password and confirm Password doesn\'t match")
-        user.set_password(password)
-        user.save()
-        return attrs
+        admin = SystemAdmin.objects.get(user_admin=user)
+        print(admin)
+        if admin is not None:
+            if password != password2:
+                raise serializers.ValidationError("Password and confirm Password doesn\'t match")
+            user.set_password(password)
+            user.save()
+            return attrs
+        else:
+            raise serializers.ValidationError("You are not in admin list")
+
+
 
 
 
@@ -85,14 +94,14 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
     """
     email = serializers.EmailField(max_length=255)
     class Meta:
-        model = User
+        model = Custom_User
         fields = ['email']
 
     def validate(self, attrs):
         email = attrs.get('email')
 
-        if User.objects.filter(email=email).exists:
-            user = User.objects.get(email=email)
+        if Custom_User.objects.filter(email=email).exists:
+            user = Custom_User.objects.get(email=email)
             #Encode the uid
             uid = urlsafe_base64_encode(force_bytes(user.id))
             print(uid)
@@ -136,7 +145,7 @@ class UserPasswordResetSerializer(serializers.Serializer):
            if password != password2:
                raise serializers.ValidationError('Password and Confirm Password doesn\'t match')
            id = smart_str(urlsafe_base64_decode(uid))
-           user = User.objects.get(id=id)
+           user = Custom_User.objects.get(id=id)
            if not PasswordResetTokenGenerator().check_token(user, token):
                raise ValidationError('Token is not valid or expired')
 
@@ -155,7 +164,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         Serializer for User to update his information
     """
     class Meta:
-        model = User
+        model = Custom_User
         fields = ['email', "lastname", "firstname", "telephone", 'adresse']
 
 class UpdateProfilePictureSerializer(serializers.ModelSerializer):
@@ -163,8 +172,8 @@ class UpdateProfilePictureSerializer(serializers.ModelSerializer):
         Serializer class to allow user to change profil picture
     """
     class Meta:
-        model = User
-        fields = ['picture',]
+        model = Custom_User
+        fields = ['picture', ]
 
 
 
@@ -175,7 +184,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     picture_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = Custom_User
         fields = ['id', 'email', 'picture_url', 'firstname']
 
     def get_picture_url(self, obj):
@@ -201,3 +210,9 @@ class ChangeEmailSerializer(serializers.Serializer):
         instance.email = validated_data.get('new_email', instance.email)
         instance.save()
         return instance
+
+
+class UserSerializer(serializers.Serializer):
+    class Meta:
+        model = Custom_User
+        fields = '__all__'

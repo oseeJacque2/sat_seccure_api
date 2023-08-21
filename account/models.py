@@ -59,17 +59,18 @@ class MyUserManger(BaseUserManager):
 
 
 
-class User(AbstractUser, PermissionsMixin):
+class Custom_User(AbstractUser, PermissionsMixin):
     email = models.EmailField(verbose_name='email adress',
                               max_length=255,
                               unique=True
                               )
     lastname = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, default="String")
     firstname = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
     sexe = models.CharField(max_length=15, choices=SEXE_CHOICES, default="AUCUN")
     telephone = models.CharField(max_length=20, default="")
-    picture = models.ImageField(default="default.png")
+    picture = models.ImageField(default="default.png",  upload_to='statics/')
 
     birth_date = models.DateField(default=timezone.now)
     adresse= models.CharField(max_length=200, default="")

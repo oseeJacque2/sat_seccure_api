@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
+from django.utils import timezone
 
 from entreprise.serializers import EnterpriseSerializer, EnterpriseRegisterSerializer
 from .models import Custom_User,ActivationCode
@@ -92,20 +93,18 @@ class SendActivationCodeView(APIView):
 class VerifyActivationCodeView(APIView):
 
     def post(self, request, activation_code,*args, **kwargs):
-        print("We are here    hhhhhhhhhhhhhhhhhhhhhhh")
-        print(activation_code)
+       
         if not activation_code:
             return Response({"error": "Activation code is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         # search activation code in temporary table
         activation_code_obj = ActivationCode.objects.filter(code=activation_code).first()
-
-        if activation_code_obj and not activation_code_obj.is_expired():
-            #Update user activate fields
-            user = activation_code_obj.user
-            user.is_validate = True
-            user.save()
-
+        if activation_code_obj:
+            if not activation_code_obj.is_expired():
+                # upadate is_activate fields for user 
+                user = activation_code_obj.user
+                user.is_activate = True
+                user.save()
             # delete code from temporary table
             activation_code_obj.delete()
 

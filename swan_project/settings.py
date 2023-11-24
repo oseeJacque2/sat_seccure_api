@@ -41,13 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'whitenoise.runserver_nostatic',
     'rest_framework',
     'account',
     'entreprise',
     'admins',
     'rest_framework_simplejwt',
-    
-    "whitenoise.runserver_nostatic",
 ]
 
 MIDDLEWARE = [
@@ -58,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
@@ -86,20 +84,25 @@ WSGI_APPLICATION = 'swan_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'c2061292c',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'sql_mode': 'STRICT_TRANS_TABLES',
+#         },
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'c2061292c',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'sql_mode': 'STRICT_TRANS_TABLES',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",  # Emplacement du fichier de base de données SQLite
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

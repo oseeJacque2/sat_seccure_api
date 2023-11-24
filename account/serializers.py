@@ -18,9 +18,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     This class Serilizer is define for user registration.We will use a class attribut password2 to verifie if the user is sure for his password
     """
     password2 = serializers.CharField(style={'input_type': "password"}, write_only=True)
+    enterprise_name = serializers.CharField(max_length=255, default="")
     class Meta:
         model = Custom_User
-        fields = ["lastname", "firstname", 'email', "telephone", "password", "password2"]
+        fields = ["email", "enterprise_name", "telephone", "password", "password2"]
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, attrs):

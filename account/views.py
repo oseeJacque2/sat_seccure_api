@@ -44,12 +44,17 @@ class UserRegistrationView(generics.CreateAPIView):
         :param kwargs:
         :return:
         """
-        serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
-            return Response({"msg": "Registration successful"}, status=status.HTTP_201_CREATED)
+        try:
+            enterprise_name = request.data.get("enterprise_name")
+            serializer = UserRegistrationSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                user = serializer.save()
+                return Response({"msg": "Registration successful"}, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error" : f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @authentication_classes([])

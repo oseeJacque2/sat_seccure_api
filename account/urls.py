@@ -23,6 +23,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
+    path('send_activation_code/', SendActivationCodeView.as_view(), name='send_activation_code'),
+    path('verify_activation_code/<activation_code>', VerifyActivationCodeView.as_view(), name='verify_activation_code'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('login/', UserLoginView.as_view(), name="login"),

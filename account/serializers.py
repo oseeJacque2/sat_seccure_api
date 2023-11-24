@@ -12,7 +12,7 @@ from django.core.mail import send_mail
 from admins.models import SystemAdmin
 
 
-#User  serializer
+#################################################### User  serializer ###################################################################
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     This class Serilizer is define for user registration.We will use a class attribut password2 to verifie if the user is sure for his password
@@ -43,11 +43,48 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         :return:  User
         """
         password = validated_data.pop('password2')
+        enterpise_name = validated_data.pop('enterprise_name')
         user = Custom_User.objects.create_user(**validated_data)
         return user
 
 
+################################################# Send Activation code Sérializer ########################################################################""
+class SendActivationCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=255)
 
+    def validate(self, attrs):
+        email = attrs.get('email')
+
+        if Custom_User.objects.filter(email=email).exists():
+            user = Custom_User.objects.get(email=email)
+
+            # verify if we are  a valid activate code for user in the table 
+            existing_code = ActivationCode.objects.filter(user=user).first()
+            if existing_code and not existing_code.is_expired():
+                raise serializers.ValidationError("Activation code still valid.")
+
+            # Generate new code validation 
+            activation_code = Util.generate_activation_code()
+
+            # save the new code validation in the table
+            ActivationCode.objects.update_or_create(user=user, defaults={'code': activation_code})
+
+            # send email to user
+            body = f"Your activation code is: {activation_code}"
+            data = {
+                'subject': "Activation Code",
+                "body": body,
+                "to_email": user.email
+            }
+            Util.send_mail(data)
+
+            return attrs
+        else:
+            raise serializers.ValidationError("User not found.")
+
+
+
+##################################################### Login Serializer ##########################################################################
 class UserLoginSerializer(serializers.ModelSerializer):
     """
     Class for User Login.

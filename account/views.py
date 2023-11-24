@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 
+from entreprise.serializers import EnterpriseSerializer, EnterpriseRegisterSerializer
 from .models import Custom_User
 from .serializers import UserLoginSerializer, UserRegistrationSerializer, SendPasswordResetEmailSerializer, \
     UserChangePasswordSerializer, UserPasswordResetSerializer, UserProfileSerializer, UpdateProfilePictureSerializer, \
@@ -30,6 +31,7 @@ def get_tokens_for_user(user):
     }
 
 
+############################################################# Create user with enterpise  ############################################################
 @authentication_classes([])
 class UserRegistrationView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -49,14 +51,62 @@ class UserRegistrationView(generics.CreateAPIView):
             serializer = UserRegistrationSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 user = serializer.save()
-                return Response({"msg": "Registration successful"}, status=status.HTTP_201_CREATED)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                #Let's create enterprise
+                if user and user.id:
+                    enterprise_name = serializer.validated_data.get('enterprise_name', '')
+                    enterprise_data = {
+                        'creator': user.id,
+                        'name': enterprise_name,
+                    }
+                enterprise_serializer = EnterpriseRegisterSerializer(data=enterprise_data)
+                if enterprise_serializer.is_valid():
+                    enterprise_serializer.save()
+                    return Response({"msg": "Registration successful. Active now your account"}, status=status.HTTP_201_CREATED)
+                else:
+                    user.delete()
+                    return Response(enterprise_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
-            return Response({"error" : f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+##################################################################  Send Activation code Views #######################################################
+class SendActivationCodeView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = SendActivationCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({"message": "Activation code sent successfully."}, status=status.HTTP_200_OK)
+
+
+############################################################## Verify activation code ################################################################# 
+class VerifyActivationCodeView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        activation_code = request.data.get('activation_code')
+
+        if not activation_code:
+            return Response({"error": "Activation code is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Recherchez le code d'activation dans la table temporaire
+        activation_code_obj = ActivationCode.objects.filter(code=activation_code).first()
+
+        if activation_code_obj and not activation_code_obj.is_expired():
+            # Mettez à jour l'attribut is_activate de l'utilisateur à True
+            user = activation_code_obj.user
+            user.is_activate = True
+            user.save()
+
+            # Supprimez le code d'activation de la table temporaire
+            activation_code_obj.delete()
+
+            return Response({"message": "Activation successful."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid or expired activation code."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
+################################################# Login Sérializer #######################################################################################
 @authentication_classes([])
 class UserLoginView(APIView):
     permission_classes = [AllowAny]

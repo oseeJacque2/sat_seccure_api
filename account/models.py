@@ -12,7 +12,7 @@ SEXE_CHOICES=(
 
 
 class MyUserManger(BaseUserManager):
-    def create_user(self, email, lastname, firstname, password=None, birth_date=timezone.now(), sexe='', adresse='', description='', profession='', telephone=''):
+    def create_user(self, email, firstname=" String",lastname="String", password=None, birth_date=timezone.now(), sexe='', adresse='', description='', profession='', telephone=''):
         """
         Creates and saves a User with the given email, name and password.
         """
@@ -21,9 +21,9 @@ class MyUserManger(BaseUserManager):
 
         user = self.model(
             email=self.normalize_email(email),
-            lastname=lastname,
-            firstname=firstname,
             birth_date=birth_date,
+            firstname= firstname, 
+            lastname = lastname,
             adresse=adresse,
             description=description,
             profession=profession,
@@ -36,15 +36,15 @@ class MyUserManger(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, lastname, firstname, password=None, birth_date=timezone.now(), sexe='', adresse='', description='', profession='', telephone=''):
+    def create_superuser(self, email,firstname,lastname, password=None, birth_date=timezone.now(), sexe='', adresse='', description='', profession='', telephone=''):
         """
         Creates and saves a superuser with the given email, name and password.
         """
         user = self.create_user(
             email,
+            firstname = firstname, 
+            lastname = lastname,
             password=password,
-            lastname=lastname,
-            firstname=firstname,
             birth_date=birth_date,
             sexe=sexe,
             adresse=adresse,
@@ -64,10 +64,10 @@ class Custom_User(AbstractUser, PermissionsMixin):
                               max_length=255,
                               unique=True
                               )
-    lastname = models.CharField(max_length=255)
+    lastname = models.CharField(max_length=255,default="String")
     name = models.CharField(max_length=255, default="String")
-    firstname = models.CharField(max_length=255)
-    username = models.CharField(max_length=255)
+    firstname = models.CharField(max_length=255,default="String")
+    username = models.CharField(max_length=255,default="String")
     sexe = models.CharField(max_length=15, choices=SEXE_CHOICES, default="AUCUN")
     telephone = models.CharField(max_length=20, default="")
     picture = models.ImageField(default="default.png",  upload_to='statics/')
@@ -107,3 +107,12 @@ class Custom_User(AbstractUser, PermissionsMixin):
 
 
 
+
+class ActivationCode(models.Model):
+    user = models.OneToOneField(Custom_User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        expiration_time = timezone.now() - timezone.timedelta(minutes=10)
+        return self.created_at < expiration_time

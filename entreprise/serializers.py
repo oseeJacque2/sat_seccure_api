@@ -41,6 +41,11 @@ class EnterpriseSerializer(serializers.ModelSerializer):
         model = Enterprise
         fields = '__all__'
 
+class EnterpriseRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enterprise
+        fields = ['name', 'creator'] 
+        
 
 ##################################Enterprise create Serializer #####################################################
 class EnterpriseCreateSerializer(serializers.ModelSerializer):

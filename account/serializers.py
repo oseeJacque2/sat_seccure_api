@@ -5,7 +5,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Custom_User
+from .models import Custom_User,ActivationCode
 from .utils import Util
 from django.core.mail import send_mail
 
@@ -51,6 +51,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 ################################################# Send Activation code Sérializer ########################################################################""
 class SendActivationCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
+    class Meta:
+        model = Custom_User
+        fields = ["email"]
 
     def validate(self, attrs):
         email = attrs.get('email')

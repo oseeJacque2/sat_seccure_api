@@ -10,10 +10,10 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 
 from entreprise.serializers import EnterpriseSerializer, EnterpriseRegisterSerializer
-from .models import Custom_User
+from .models import Custom_User,ActivationCode
 from .serializers import UserLoginSerializer, UserRegistrationSerializer, SendPasswordResetEmailSerializer, \
     UserChangePasswordSerializer, UserPasswordResetSerializer, UserProfileSerializer, UpdateProfilePictureSerializer, \
-    UpdateUserSerializer, ChangeEmailSerializer
+    UpdateUserSerializer, ChangeEmailSerializer,SendActivationCodeSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -73,6 +73,15 @@ class UserRegistrationView(generics.CreateAPIView):
 
 ##################################################################  Send Activation code Views #######################################################
 class SendActivationCodeView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = SendActivationCodeSerializer
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+
+    @swagger_auto_schema(
+        operation_description="Endpoint Login",
+        request_body = SendActivationCodeSerializer
+    ) 
+
     def post(self, request, *args, **kwargs):
         serializer = SendActivationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -82,22 +91,22 @@ class SendActivationCodeView(APIView):
 ############################################################## Verify activation code ################################################################# 
 class VerifyActivationCodeView(APIView):
 
-    def post(self, request, *args, **kwargs):
-        activation_code = request.data.get('activation_code')
-
+    def post(self, request, activation_code,*args, **kwargs):
+        print("We are here    hhhhhhhhhhhhhhhhhhhhhhh")
+        print(activation_code)
         if not activation_code:
             return Response({"error": "Activation code is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Recherchez le code d'activation dans la table temporaire
+        # search activation code in temporary table
         activation_code_obj = ActivationCode.objects.filter(code=activation_code).first()
 
         if activation_code_obj and not activation_code_obj.is_expired():
-            # Mettez à jour l'attribut is_activate de l'utilisateur à True
+            #Update user activate fields
             user = activation_code_obj.user
-            user.is_activate = True
+            user.is_validate = True
             user.save()
 
-            # Supprimez le code d'activation de la table temporaire
+            # delete code from temporary table
             activation_code_obj.delete()
 
             return Response({"message": "Activation successful."}, status=status.HTTP_200_OK)

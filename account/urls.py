@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from account.views import UserRegistrationView, UserLoginView, SendPasswordResetEmailView, UserChangePasswordView, UserPasswordResetView, UserProfileView, UpdateUserView, UpdateProfilePictureView, ChangeEmailView
+from account.views import UserRegistrationView, UserLoginView, SendPasswordResetEmailView, UserChangePasswordView, UserPasswordResetView, UserProfileView, UpdateUserView, UpdateProfilePictureView, ChangeEmailView,SendActivationCodeView,VerifyActivationCodeView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 

@@ -79,6 +79,7 @@ class Custom_User(AbstractUser, PermissionsMixin):
     date_created_at = models.DateTimeField(auto_now_add=True)
     date_updated_at = models.DateTimeField(auto_now=True)
     is_admin = models.BooleanField(default=False)
+    is_validate = models.BooleanField(default=False)
 
 
     objects = MyUserManger()

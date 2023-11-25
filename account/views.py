@@ -33,11 +33,10 @@ def get_tokens_for_user(user):
 
 
 ############################################################# Create user with enterpise  ############################################################
-@authentication_classes([])
 class UserRegistrationView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserRegistrationSerializer
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
     def post(self, request, *args, **kwargs):
         """

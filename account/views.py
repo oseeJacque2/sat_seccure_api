@@ -75,7 +75,7 @@ class UserRegistrationView(generics.CreateAPIView):
 class SendActivationCodeView(APIView):
     permission_classes = [AllowAny]
     serializer_class = SendActivationCodeSerializer
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
     @swagger_auto_schema(
         operation_description="Endpoint Login",
@@ -102,7 +102,7 @@ class VerifyActivationCodeView(APIView):
             if not activation_code_obj.is_expired():
                 # upadate is_activate fields for user 
                 user = activation_code_obj.user
-                user.is_activate = True
+                user.is_validate = True
                 user.save()
             # delete code from temporary table
             activation_code_obj.delete()

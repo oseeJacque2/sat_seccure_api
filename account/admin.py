@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Custom_User
+from .models import Custom_User,ActivationCode
 class UserModelAdmin(BaseUserAdmin):
 
     # The fields to be used in displaying the User model.
@@ -28,3 +28,4 @@ class UserModelAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
     admin.site.register(Custom_User)
+    admin.site.register(ActivationCode)

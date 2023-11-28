@@ -12,9 +12,9 @@ from django.utils import timezone
 
 from entreprise.serializers import EnterpriseSerializer, EnterpriseRegisterSerializer
 from .models import Custom_User,ActivationCode
-from .serializers import UserLoginSerializer, UserRegistrationSerializer, SendPasswordResetEmailSerializer, \
+from .serializers import CompleteUserInformationSerializer, UserLoginSerializer, UserRegistrationSerializer, SendPasswordResetEmailSerializer, \
     UserChangePasswordSerializer, UserPasswordResetSerializer, UserProfileSerializer, UpdateProfilePictureSerializer, \
-    UpdateUserSerializer, ChangeEmailSerializer,SendActivationCodeSerializer
+    UpdateUserSerializer, ChangeEmailSerializer,SendActivationCodeSerializer, UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -117,7 +117,7 @@ class VerifyActivationCodeView(APIView):
 @authentication_classes([])
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     serializer_class = UserLoginSerializer
 
     @swagger_auto_schema(
@@ -137,7 +137,22 @@ class UserLoginView(APIView):
             if check_password(password, user.password):
                 token = get_tokens_for_user(user)
                 print(user.password)
-                return Response({'token': token, 'msg': 'Login Sucess'}, status=status.HTTP_200_OK)
+                user_data = {
+                    'id': user.id,
+                    'email': user.email,
+                    'lastname': user.lastname,
+                    'name': user.name,
+                    'firstname': user.firstname,
+                    'username': user.username,
+                    'sexe': user.sexe,
+                    'telephone': user.telephone,
+                    'picture': str(user.picture),
+                    'birth_date': user.birth_date,
+                    'adresse': user.adresse,
+                    'description': user.description,
+                    'profession': user.profession,
+                }
+                return Response({'token': token, 'user': user_data, 'msg': 'Login Sucess'}, status=status.HTTP_200_OK)
 
         return Response({'errors': {'non_field_errors': ['Email or Password is not Valid']}},
                         status=status.HTTP_404_NOT_FOUND)
@@ -158,6 +173,42 @@ class SendPasswordResetEmailView(APIView):
         if serializer.is_valid(raise_exception=True):
             return Response({'msg': "Password Reset Sucessfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+############################################### Complete User Information view ##################################################### 
+class CompleteUserInformationView(APIView):
+    serializer_class = CompleteUserInformationSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    
+    @swagger_auto_schema(
+        operation_description="Complete User information",
+        request_body=CompleteUserInformationSerializer
+    ) 
+    
+    def post(self, request, *args, **kwargs):
+        serializer = CompleteUserInformationSerializer(data = request.data)
+        if serializer.is_valid():
+            user_instance = request.user  
+            serializer.update(user_instance, serializer.validated_data)
+            updated_user = Custom_User.objects.get(id = user_instance.id) 
+            user_data = {
+                    'id':updated_user.id,
+                    'email':updated_user.email,
+                    'lastname':updated_user.lastname,
+                    'name':updated_user.name,
+                    'firstname':updated_user.firstname,
+                    'username':updated_user.username,
+                    'sexe':updated_user.sexe,
+                    'telephone':updated_user.telephone,
+                    'picture': str(updated_user.picture),
+                    'birth_date':updated_user.birth_date,
+                    'adresse':updated_user.adresse,
+                    'description':updated_user.description,
+                    'profession':updated_user.profession,
+                }
+            return Response({"message": "User information updated successfully", "user": user_data}, status=status.HTTP_200_OK)        
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Change password whan user is authenticated

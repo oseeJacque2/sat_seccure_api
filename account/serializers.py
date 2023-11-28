@@ -12,7 +12,14 @@ from django.core.mail import send_mail
 from admins.models import SystemAdmin
 
 
-#################################################### User  serializer ###################################################################
+#######################################################User Serializer ##################################################################""
+class UserSerializer(serializers.Serializer):
+    class Meta:
+        model = Custom_User
+        fields = '__all__' 
+        
+        
+#################################################### User  serializer registerSerializer ###################################################################
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     This class Serilizer is define for user registration.We will use a class attribut password2 to verifie if the user is sure for his password
@@ -98,7 +105,25 @@ class UserLoginSerializer(serializers.ModelSerializer):
         fields = ["email", "password"]
 
 
+############################################## Complete user Information serializer ##########################################
 
+class CompleteUserInformationSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Custom_User 
+        fields = ["lastname", "firstname", "telephone", "sexe", "profession", "description", "birth_date","adresse"] 
+        
+    def update(self, instance, validated_data):
+        # updated each valide fields
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+
+        # Save the modification 
+        instance.save()
+
+        return instance
+
+#####################################################################################################################################################################
 class UserChangePasswordSerializer(serializers.Serializer):
     """
         Serializer class for user to allow to change the password when it authenticate
@@ -252,8 +277,3 @@ class ChangeEmailSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-
-class UserSerializer(serializers.Serializer):
-    class Meta:
-        model = Custom_User
-        fields = '__all__'

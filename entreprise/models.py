@@ -62,8 +62,14 @@ class Role(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-
-
+################################################## Economic sector ##################################""
+class EconomicSector(models.Model):
+    __metaclass__ = ModelBasic
+    sectorname = models.CharField(max_length=255, default="") 
+    sectordesciption = models.CharField(max_length=255, default= "")
+    
+    
+######################################## Enterprise class ###################################################""
 class Enterprise(models.Model):
     __metaclass__ = ModelBasic
     creator = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
@@ -81,6 +87,7 @@ class Enterprise(models.Model):
     description = models.CharField(max_length=255, default='String')
     request_to_use = models.CharField(max_length=255, default=" ")
     country = models.ForeignKey(Country, on_delete=models.CASCADE, default=1)
+    sectors = models.ManyToManyField(EconomicSector,default=1)
 
     def __str__(self):
         return f"{self.name}"

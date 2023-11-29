@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import Enterprise, Country, EmployeeStatusLog, EmployeeRoom, Room, Face, SecurityCode, Qr, Employee, Role, \
-    EnterpriseAdmin, EnterpriseAdminRole
+    EnterpriseAdmin, EnterpriseAdminRole,EconomicSector
 
 admin.site.register(Enterprise)
 admin.site.register(Country)
@@ -15,3 +15,5 @@ admin.site.register(Room)
 admin.site.register(EmployeeRoom)
 admin.site.register(EmployeeStatusLog)
 admin.site.register(EnterpriseAdminRole)
+admin.site.register(EconomicSector)
+

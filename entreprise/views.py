@@ -10,7 +10,7 @@ from django.db import models
 
 from .models import Country, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
-from .serializers import CountrySerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
+from .serializers import CompletEnterpiseInformationSerializer, CountrySerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
     EnterpriseUpdateSerializer, EnterpriseValidationSerializer, EntrepriseAdminSerializer, EnterpriseCreateSerializer, \
     EmployeeSerializer, CreateEmployeeSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
     EmployeeRoomSerializer, QrSerializer, SecurityCodeSerializer, EnterpriseAdminRoleSerializer
@@ -66,7 +66,19 @@ class EnterpriseCreateWithoutRegisterView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+################################################ Complete Enterprise information view ########################################"" 
 
+class CompleteEnterpriseInformationView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = CompletEnterpiseInformationSerializer
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    
+    @swagger_auto_schema(
+        operation_description="Auth_entreprise_login",
+        request_body=UserLoginSerializer
+    ) 
+    def post():
+        pass
 class EnterpriseLoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = UserLoginSerializer

@@ -20,6 +20,7 @@ class EntrepriseAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = EnterpriseAdmin
         fields = '__all__'
+        
     def validate(self,data):
         user = self.context['request'].user
 
@@ -35,11 +36,32 @@ class EntrepriseAdminSerializer(serializers.ModelSerializer):
 
 
 
-##################################Enterprise Serializers #####################################################
+################################## Enterprise Serializers #####################################################
 class EnterpriseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enterprise
         fields = '__all__'
+
+################################################# Complete enterprise information Serializer ################################################### 
+class CompletEnterpiseInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enterprise
+        fields = ['email', 'director_card_id', 'director_card_type', 'director_fullname', 'phone','description', 'adress', 'country','sectors','ifu','rcm']  
+        
+        def update(self, instance, validated_data):
+            enterprise_id = self.context.get('enterprise_id')
+
+            if enterprise_id:
+                enterprise = Enterprise.objects.get(pk=enterprise_id)
+
+                for field, value in validated_data.items():
+                    setattr(enterprise, field, value)
+
+                enterprise.save()
+
+                return enterprise
+            else:
+                raise serializers.ValidationError("L'identifiant de l'entreprise doit être fourni pour la mise à jour.")
 
 class EnterpriseRegisterSerializer(serializers.ModelSerializer):
     class Meta:

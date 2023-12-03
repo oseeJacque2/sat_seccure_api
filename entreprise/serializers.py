@@ -46,23 +46,23 @@ class EnterpriseSerializer(serializers.ModelSerializer):
 class CompletEnterpiseInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enterprise
-        fields = ['email', 'director_card_id', 'director_card_type', 'director_fullname', 'phone','description', 'adress', 'country','sectors','ifu','rcm']  
+        fields = ['email', 'director_card_id', 'director_card_type', 'director_firstname','director_lastname', 'phone','description', 'adress', 'country','sectors','ifu','rcm']  
         
         def update(self, instance, validated_data):
-            enterprise_id = self.context.get('enterprise_id')
-
-            if enterprise_id:
-                enterprise = Enterprise.objects.get(pk=enterprise_id)
-
-                for field, value in validated_data.items():
-                    setattr(enterprise, field, value)
-
-                enterprise.save()
-
-                return enterprise
-            else:
-                raise serializers.ValidationError("L'identifiant de l'entreprise doit être fourni pour la mise à jour.")
-
+            instance.director_firstname = validated_data.get('director_firstname', instance.director_firstname)
+            instance.director_lastname = validated_data.get('director_lastname', instance.director_lastname)
+            instance.director_card_id = validated_data.get('director_card_id', instance.director_card_id)
+            instance.director_card_type = validated_data.get('director_card_type', instance.director_card_type)
+            instance.phone = validated_data.get('phone', instance.phone)
+            instance.description = validated_data.get('description', instance.description)
+            instance.adress = validated_data.get('adress', instance.adress)
+            instance.country = validated_data.get('country', instance.country)
+            instance.sectors.set(validated_data.get('sectors', instance.sectors.all()))
+            instance.ifu = validated_data.get('ifu', instance.ifu)
+            instance.rcm = validated_data.get('rcm', instance.rcm)
+            instance.email = validated_data.get('email', instance.email)
+            instance.save()
+            return instance
 class EnterpriseRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enterprise

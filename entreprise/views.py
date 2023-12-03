@@ -69,16 +69,31 @@ class EnterpriseCreateWithoutRegisterView(APIView):
 ################################################ Complete Enterprise information view ########################################"" 
 
 class CompleteEnterpriseInformationView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CompletEnterpiseInformationSerializer
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     
     @swagger_auto_schema(
         operation_description="Auth_entreprise_login",
-        request_body=UserLoginSerializer
+        request_body=CompletEnterpiseInformationSerializer
     ) 
-    def post():
-        pass
+  
+    def post(self, request, enterprise_id, *args, **kwargs):
+        try:
+            enterprise = Enterprise.objects.get(pk=enterprise_id)
+        except Enterprise.DoesNotExist:
+            return Response({"error": "Enterprise not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CompletEnterpiseInformationSerializer(instance=enterprise, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Enterprise information updated successfully", "enterprise": serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    
+    
 class EnterpriseLoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = UserLoginSerializer
@@ -121,17 +136,17 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
         return self.queryset
 
     def get_serializer_class(self):
-        if self.action == "retrieve" or self.action == "list":
-            return EnterpriseSerializer
+        if self.action == "retrieve" or self.action == "list" or self.action == "":
+            return EnterpriseSerializer 
+        
         else:
             return self.serializer_class
 
-    #def list(self, request):
-        #return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
     def list(self, request):
-        queryset = Enterprise.objects.all()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer. data)
+        user_enterprises = Enterprise.objects.filter(creator=request.user)
+        serializer = EnterpriseSerializer(user_enterprises, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -176,8 +191,9 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
         if instance.creator.id != user.id:
             print(f"Vous n'êtes pas le créateur")
             return Response(data="You have not acces to data from enterprise", status=status.HTTP_403_FORBIDDEN)
-        return Response(self.serializer_class(instance).data,
+        return Response({"enterprisen":EnterpriseSerializer(instance).data,"msg":"sucess"},
                         status=status.HTTP_200_OK)
+        
     def get_room_for_enterprise(self, request, pk=None, *args, **kwargs):
         user = request.user
         id = self.kwargs.get("enterprise_id")

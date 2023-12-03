@@ -73,10 +73,8 @@ class EconomicSector(models.Model):
 class Enterprise(models.Model):
     __metaclass__ = ModelBasic
     email = models.EmailField(verbose_name='email adress',
-                              max_length=255,
-                              unique=True,default="nothin@gmail.com"
+                              max_length=255,default="nothin@gmail.com"
                               ) 
-    
     creator = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     ifu = models.CharField(max_length=255, default=" ")
@@ -84,7 +82,9 @@ class Enterprise(models.Model):
     director_card_id = models.CharField(max_length=255, default=" ")
     director_card_file = models.ImageField(default='default.png', upload_to='statics/')
     director_card_type = models.CharField(max_length=255, choices=CARD_TYPES, default='CNI')
-    director_fullname = models.CharField(max_length=255, default="String")
+    director_fullname = models.CharField(max_length=255, default="String"), 
+    director_lastname = models.CharField(max_length=255, default="String")  # Corrected field name
+    director_firstname = models.CharField(max_length=255, default="String")  # Corrected field name
     phone = models.CharField(max_length=255, default="String")
     is_approved = models.BooleanField(default=False)
     logo = models.ImageField(default='default.png', upload_to='statics/')
@@ -93,7 +93,7 @@ class Enterprise(models.Model):
     adress = models.CharField(max_length=255, default='String')
     request_to_use = models.CharField(max_length=255, default=" ")
     country = models.ForeignKey(Country, on_delete=models.CASCADE, default=1)
-    sectors = models.ManyToManyField(EconomicSector,default=1)
+    sectors = models.CharField(max_length=255, default="String"),#models.ManyToManyField(EconomicSector,default=1)
 
     def __str__(self):
         return f"{self.name}"

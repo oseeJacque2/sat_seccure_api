@@ -93,7 +93,7 @@ class Enterprise(models.Model):
     adress = models.CharField(max_length=255, default='String')
     request_to_use = models.CharField(max_length=255, default=" ")
     country = models.ForeignKey(Country, on_delete=models.CASCADE, default=1)
-    sectors = models.CharField(max_length=255, default="String"),#models.ManyToManyField(EconomicSector,default=1)
+    sectors =models.ManyToManyField(EconomicSector,default=1)
 
     def __str__(self):
         return f"{self.name}"

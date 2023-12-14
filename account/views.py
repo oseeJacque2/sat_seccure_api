@@ -178,7 +178,7 @@ class SendPasswordResetEmailView(APIView):
 class CompleteUserInformationView(APIView):
     serializer_class = CompleteUserInformationSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     
     @swagger_auto_schema(
         operation_description="Complete User information",

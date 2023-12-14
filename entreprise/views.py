@@ -129,14 +129,14 @@ class EnterpriseLoginView(APIView):
 class EnterpriseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = EnterpriseCreateSerializer
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
     def get_queryset(self):
         self.queryset = Enterprise.objects.all()
         return self.queryset
 
     def get_serializer_class(self):
-        if self.action == "retrieve" or self.action == "list" or self.action == "":
+        if self.action == "retrieve" or self.action == "list" or self.action == "" or self.action == "update":
             return EnterpriseSerializer 
         
         else:
@@ -146,7 +146,7 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
     def list(self, request):
         user_enterprises = Enterprise.objects.filter(creator=request.user)
         serializer = EnterpriseSerializer(user_enterprises, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK) 
+        return Response({"enterprise":serializer.data, "msg": "success"}, status=status.HTTP_200_OK) 
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -179,7 +179,7 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             if instance.creator.id == user.id:
                 serializer.save()
-                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+                return Response({"enterprise":serializer.data,"msg":"updated success"}, status=status.HTTP_201_CREATED)
             else:
                 return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

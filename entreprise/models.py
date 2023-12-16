@@ -36,13 +36,12 @@ SEXE_CHOICES=(
 
 
 #Base modelClass
-class ModelBasic(ABC):
+class ModelBasic():
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 ###############################  Country class  ################################################
-class Country(models.Model):
-    __metaclass__ = ModelBasic
+class Country(models.Model,ModelBasic):
     continent = models.CharField(max_length=255, choices=continent_choices)
     name = models.CharField(max_length=255),
     indicatif = models.CharField(max_length=255)
@@ -129,10 +128,11 @@ class EnterpriseAdminRole(models.Model):
 
 ##########################  class Employee  ##################################
 class Employee(models.Model):
-    __metaclass__ = ModelBasic
     user = models.OneToOneField(Custom_User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
+    date_created_at = models.DateTimeField(auto_now_add=True)
+    date_updated_at = models.DateTimeField(auto_now=True)
 
 
     def __str__(self):

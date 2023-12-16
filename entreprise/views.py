@@ -338,13 +338,15 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     def get_all_employee_by_enterprize(self, request, *args, **kwargs):
         try:
             interprise_id = self.kwargs.get("interprise_id") 
-            print("*"*100)
             employees = Employee.objects.filter(enterprise=interprise_id)
             employee_data = [] 
             for employee in employees:
                 print("*"*100)
-                user = Custom_User.objects.get(id = employee.user.id) 
+                print(employee.is_active)
+                user = Custom_User.objects.get(id = employee.user.id)
+                enterpise_serializer = EnterpriseSerializer(employee.enterprise)
                 user_data = {
+                    "user":{
                     'id':user.id,
                     'email':user.email,
                     'lastname':user.lastname,
@@ -357,10 +359,16 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     'birth_date':user.birth_date,
                     'adresse':user.adresse,
                     'description':user.description,
-                    'profession':user.profession,
+                    'profession':user.profession, 
+                    } ,
+                    "id":employee.id,
+                    "is_active": employee.is_active,
+                    "date_created_at" : employee.date_created_at, 
+                    "date_updated_at" : employee.date_updated_at,
+                    "enterprise": enterpise_serializer.data
                 }
                 employee_data.append(user_data) 
-            return Response(self.serializer_class(employees,many=True).data, status=status.HTTP_200_OK)
+            return Response({"employees":employee_data,"msg":"success"}, status=status.HTTP_200_OK)
         except Employee.DoesNotExist:
             return Response({"error": "Employee not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

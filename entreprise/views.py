@@ -337,8 +337,29 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def get_all_employee_by_enterprize(self, request, *args, **kwargs):
         try:
-            interprise_id = self.kwargs.get("interprise_id")
+            interprise_id = self.kwargs.get("interprise_id") 
+            print("*"*100)
             employees = Employee.objects.filter(enterprise=interprise_id)
+            employee_data = [] 
+            for employee in employees:
+                print("*"*100)
+                user = Custom_User.objects.get(id = employee.user.id) 
+                user_data = {
+                    'id':user.id,
+                    'email':user.email,
+                    'lastname':user.lastname,
+                    'name':user.name,
+                    'firstname':user.firstname,
+                    'username':user.username,
+                    'sexe':user.sexe,
+                    'telephone':user.telephone,
+                    'picture': str(user.picture),
+                    'birth_date':user.birth_date,
+                    'adresse':user.adresse,
+                    'description':user.description,
+                    'profession':user.profession,
+                }
+                employee_data.append(user_data) 
             return Response(self.serializer_class(employees,many=True).data, status=status.HTTP_200_OK)
         except Employee.DoesNotExist:
             return Response({"error": "Employee not found."}, status=status.HTTP_404_NOT_FOUND)

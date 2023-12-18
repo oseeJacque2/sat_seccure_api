@@ -1,5 +1,6 @@
 from django.contrib.auth.hashers import check_password
 from django.db.migrations import serializer
+from django.http import HttpResponse
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import authentication_classes, action
 from rest_framework.generics import get_object_or_404
@@ -7,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from django.db import models
+from django.urls import reverse
+
+from swan_project import settings
 
 from .models import Country, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
@@ -23,7 +27,17 @@ from account.views import get_tokens_for_user
 
 from admins.models import SystemAdmin
 
-
+def download_face_file(request, face_id):
+    face = get_object_or_404(Face, id=face_id)
+    file_url = reverse('download-face-file', kwargs={'face_id': face_id})
+    file_path = settings.MEDIA_ROOT + face.face_file.name  # Ajuster selon votre configuration
+    with open(file_path, 'rb') as file:
+        response = HttpResponse(file.read())
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = f'attachment; filename="{face.face_file.name}"'
+        return response
+    
+    
 ############################## Enterprise View #########################################"
 
 
@@ -199,7 +213,7 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
         id = self.kwargs.get("enterprise_id")
         enterprise = get_object_or_404(Enterprise, id=id)
         rooms = Room.objects.filter(enterprise=enterprise)
-        return Response(RoomSerializer(rooms, many=True).data, status=status.HTTP_200_OK)
+        return Response({"rooms":RoomSerializer(rooms, many=True).data,"msg":"success"}, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None, *args, **kwargs):
         instance = self.get_object()
@@ -250,7 +264,7 @@ class EnterpriseAskValidationView(viewsets.ModelViewSet):
 class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = Enterprise.objects.all()
     user_employee = Custom_User()
 
@@ -298,7 +312,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         employee = Employee(user=self.user_employee, is_active=False, enterprise=enterprise)
         employee.save()
 
-        return Response({"user": f"{self.user_employee}", "Enterprise": f"{EnterpriseSerializer(enterprise).data}"},
+        return Response({"employee": employee.id, "Enterprise": f"{EnterpriseSerializer(enterprise).data}","msg":"success"},
                         status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
@@ -343,8 +357,20 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             for employee in employees:
                 print("*"*100)
                 print(employee.is_active)
+                #Get enterprise for employee
                 user = Custom_User.objects.get(id = employee.user.id)
                 enterpise_serializer = EnterpriseSerializer(employee.enterprise)
+                
+                #get user images
+                all_image_for_employee = Face.objects.filter(employee=employee.id)
+                # Serialize faces with download URLs
+                serialized_faces = []
+                for face in all_image_for_employee:
+                    face_data = FacesSerializer(face).data
+                    #download_url = reverse('download-face-file', kwargs={'face_id': face.id})
+                    face_data['face_file'] = request.build_absolute_uri(face.face_file.url)
+                    serialized_faces.append(face_data)
+                    
                 user_data = {
                     "user":{
                     'id':user.id,
@@ -365,7 +391,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     "is_active": employee.is_active,
                     "date_created_at" : employee.date_created_at, 
                     "date_updated_at" : employee.date_updated_at,
-                    "enterprise": enterpise_serializer.data
+                    "enterprise": enterpise_serializer.data, 
+                    "faces": serialized_faces
                 }
                 employee_data.append(user_data) 
             return Response({"employees":employee_data,"msg":"success"}, status=status.HTTP_200_OK)
@@ -426,9 +453,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 class FacesViewSet(viewsets.ModelViewSet):
     serializer_class = FacesSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = Face.objects.all()
-
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -510,7 +536,7 @@ class FacesViewSet(viewsets.ModelViewSet):
 class RoomViewset(viewsets.ModelViewSet):
     serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = Room.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -518,7 +544,7 @@ class RoomViewset(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response({"msg":"success","room":serializer.data}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)

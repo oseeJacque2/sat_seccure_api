@@ -158,8 +158,10 @@ class Qr(models.Model):
 class SecurityCode(models.Model):
     __metaclass__ = ModelBasic
     is_current = models.BooleanField(default=False)
-    code = models.CharField(max_length=255)
+    code = models.CharField(max_length=255,unique=True)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    date_created_at = models.DateTimeField(auto_now_add=True)
+    date_updated_at = models.DateTimeField(auto_now=True)
 
 ############################### class Face   ###############################
 class Face(models.Model):
@@ -190,7 +192,9 @@ class Room(models.Model):
 class EmployeeRoom(models.Model):
     __metaclass__ = ModelBasic
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE) 
+    date_add_at = models.DateTimeField(auto_now_add=True)
+    date_updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
         return f"{self.room.designation}"

@@ -351,11 +351,11 @@ class SecurityCodeSerializer(serializers.ModelSerializer):
         request_method = self.context['request'].method
         if request_method == "put" or request_method == "patch" or request_method == "delete" or request_method == "post":
             try:
-                system_admin = SystemAdmin.objects.get(user_admin=user)
+                system_admin = SystemAdmin.objects.filter(user_admin=user)
                 return data
             except SystemAdmin.DoesNotExist:
                 try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
+                    entreprise_creatrice = Enterprise.objects.filter(creator=user)
                     return data
                 except Enterprise.DoesNotExist:
                     try:
@@ -374,7 +374,7 @@ class SecurityCodeSerializer(serializers.ModelSerializer):
                 return data
             except SystemAdmin.DoesNotExist:
                 try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
+                    entreprise_creatrice = Enterprise.objects.filter(creator=user)
                     return data
                 except Enterprise.DoesNotExist:
                     try:

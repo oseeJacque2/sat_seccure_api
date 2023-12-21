@@ -22,5 +22,5 @@ urlpatterns = [
          name='get employee code qr'),
     path('enterprise/<interprise_id>/<employee_id>/security_code/', EmployeeViewSet.as_view({'get': 'get_employee_security_code'}),
          name='get employee security code'),
-
+     path('enterprise/<int:enterprise_id>/<int:room_id>/all_employee/',EmployeeViewSet.as_view({"get":'get_employee_by_room_in_enterpise'}))
 ]

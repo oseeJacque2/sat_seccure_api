@@ -355,8 +355,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             employees = Employee.objects.filter(enterprise=interprise_id)
             employee_data = [] 
             for employee in employees:
-                print("*"*100)
-                print(employee.is_active)
                 #Get enterprise for employee
                 user = Custom_User.objects.get(id = employee.user.id)
                 enterpise_serializer = EnterpriseSerializer(employee.enterprise)
@@ -447,6 +445,25 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             return Response({"error": "Employee not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['get'])
+    def get_employee_by_room_in_enterpise(self,request,*args,**kwargs):
+        try:
+            idRoom = self.kwargs.get("room_id")
+            employeeRooms = EmployeeRoom.objects.filter(room=idRoom)
+
+            return Response({"employeesrooms": EmployeeRoomSerializer(employeeRooms,many=True).data, "msg": "success"}, status=status.HTTP_200_OK)
+
+        except EmployeeRoom.DoesNotExist:
+            return Response({"error": "La salle spécifiée n'existe pas."}, status=status.HTTP_404_NOT_FOUND)
+
+        except Employee.DoesNotExist:
+            return Response({"error": "L'employé associé à la salle n'existe pas."}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                
 
 
 ########################################## Face viewset #######################################
@@ -601,9 +618,10 @@ class SecurityCodeViewset(viewsets.ModelViewSet):
         user = request.user
         try:
             serializer = self.get_serializer(data=request.data)
+            print("Hello we are here")
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response({"code":serializer.data,"msg":"success"}, status=status.HTTP_201_CREATED)
             else:
                 return Response({"error": f"{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

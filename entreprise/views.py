@@ -9,6 +9,9 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from django.db import models
 from django.urls import reverse
+from django.core.files.base import ContentFile
+from io import BytesIO
+import qrcode
 
 from swan_project import settings
 
@@ -358,7 +361,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                 #Get enterprise for employee
                 user = Custom_User.objects.get(id = employee.user.id)
                 enterpise_serializer = EnterpriseSerializer(employee.enterprise)
-                
                 #get user images
                 all_image_for_employee = Face.objects.filter(employee=employee.id)
                 # Serialize faces with download URLs
@@ -369,6 +371,14 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     face_data['face_file'] = request.build_absolute_uri(face.face_file.url)
                     serialized_faces.append(face_data)
                     
+                # Get security code for the employee
+                try:
+                    employee_security_code = SecurityCode.objects.get(employee=employee.id, is_current=True)
+                    security_code_data = SecurityCodeSerializer(employee_security_code).data
+                except SecurityCode.DoesNotExist:
+                    # If no security code is found, set security_code_data to 0
+                    security_code_data = 0 
+                print("We are here oooooooooooooooooooooo")
                 user_data = {
                     "user":{
                     'id':user.id,
@@ -390,7 +400,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     "date_created_at" : employee.date_created_at, 
                     "date_updated_at" : employee.date_updated_at,
                     "enterprise": enterpise_serializer.data, 
-                    "faces": serialized_faces
+                    "faces": serialized_faces, 
+                    "security_code": security_code_data
                 }
                 employee_data.append(user_data) 
             return Response({"employees":employee_data,"msg":"success"}, status=status.HTTP_200_OK)
@@ -592,20 +603,53 @@ class EmployeeRoomViewset(viewsets.ModelViewSet):
 class QrViewset(viewsets.ModelViewSet):
     serializer_class = QrSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = Qr.objects.all()
 
     def create(self, request, *args, **kwargs):
         user = request.user
+        employee_id = request.data.get("employee")
+        
         try:
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response({"error": f"{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST)
+            qr_content = request.data.get("qr_code", "")
+            
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(qr_content)
+            qr.make(fit=True)
+            
+            img = qr.make_image(fill_color="black", back_color="white")
+
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+
+            # Obtenir l'instance de l'employé à partir de l'ID
+            employee_instance = get_object_or_404(Employee, id=employee_id)
+            
+            # Mettre à jour les Qr existants si is_current est vrai
+            if request.data.get("is_current", False):
+                Qr.objects.filter(employee=employee_instance).update(is_current=False)
+            
+            qr_instance = Qr.objects.create(
+                qr_code=qr_content,
+                employee=employee_instance,
+                is_current=bool(request.data.get("is_current"))
+            )
+            print("c'est ici")
+            qr_instance.qr_image.save(f"qrcode_{qr_instance.id}.png", ContentFile(buffer.getvalue()))
+
+            # Ajouter l'URL vers l'image du code QR dans la réponse
+            qr_instance_data = QrSerializer(qr_instance).data
+            qr_instance_data["qr_image_url"] = request.build_absolute_uri(qr_instance.qr_image.url)
+
+            return Response({"code_qr":qr_instance_data,"msg": "success"}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"error": f"{e}"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 ######################################SecurityCode Viewset ####################################
 class SecurityCodeViewset(viewsets.ModelViewSet):
@@ -618,14 +662,26 @@ class SecurityCodeViewset(viewsets.ModelViewSet):
         user = request.user
         try:
             serializer = self.get_serializer(data=request.data)
-            print("Hello we are here")
+            print("Hello, we are here")
+            
             if serializer.is_valid():
+                # Get the employee for whom the code is being created
+                employee = serializer.validated_data['employee']
+
+                # Check if is_current is True
+                if serializer.validated_data['is_current']:
+                    # If is_current is True, set is_current to False for all other security codes of the employee
+                    SecurityCode.objects.filter(employee=employee).update(is_current=False)
+
+                # Save the new security code
                 serializer.save()
-                return Response({"code":serializer.data,"msg":"success"}, status=status.HTTP_201_CREATED)
+
+                return Response({"code": serializer.data, "msg": "success"}, status=status.HTTP_201_CREATED)
             else:
                 return Response({"error": f"{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": f"{e}"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST) 
+        
 ################################## Viewset for Country ########################################
 
 class CountryViewSet(viewsets.ModelViewSet):

@@ -182,21 +182,15 @@ class FacesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        print("I'm in serializer")
         image = convert_image_to_numpy_array(data.get("face_file"))
-        print("Transform to numpy success")
         detect_face_result = detect_face(image)
-        print("detect face success")
         if detect_face_result is None:
-            print("No image detect")
             raise serializers.ValidationError("No face detect in image or We dectect more than 2 face in images. Please change the image")
 
         else:
             print("One personne")
             face_verification = verify_face(employee=data.get('employee'), image=detect_face_result)
-            print("Le resultat est ")
-            print(face_verification)
-            if face_verification > 0.60:
+            if face_verification > 0.50:
                 return data
             else:
                 raise serializers.ValidationError("The probality of ressemblance between the images is less than 60%")

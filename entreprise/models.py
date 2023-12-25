@@ -163,6 +163,7 @@ class SecurityCode(models.Model):
     date_created_at = models.DateTimeField(auto_now_add=True)
     date_updated_at = models.DateTimeField(auto_now=True)
 
+
 ############################### class Face   ###############################
 class Face(models.Model):
     __metaclass__ = ModelBasic

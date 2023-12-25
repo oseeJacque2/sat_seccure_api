@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.core.files.base import ContentFile
 from io import BytesIO
 import qrcode
-
+from urllib.parse import urljoin
 from swan_project import settings
 
 from .models import Country, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
@@ -363,12 +363,12 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                 enterpise_serializer = EnterpriseSerializer(employee.enterprise)
                 #get user images
                 all_image_for_employee = Face.objects.filter(employee=employee.id)
+                
                 # Serialize faces with download URLs
                 serialized_faces = []
                 for face in all_image_for_employee:
                     face_data = FacesSerializer(face).data
-                    #download_url = reverse('download-face-file', kwargs={'face_id': face.id})
-                    face_data['face_file'] = request.build_absolute_uri(face.face_file.url)
+                    face_data['face_file'] = urljoin(request.build_absolute_uri(), face.face_file.url)
                     serialized_faces.append(face_data)
                     
                 # Get security code for the employee
@@ -377,8 +377,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     security_code_data = SecurityCodeSerializer(employee_security_code).data
                 except SecurityCode.DoesNotExist:
                     # If no security code is found, set security_code_data to 0
-                    security_code_data = 0 
-                print("We are here oooooooooooooooooooooo")
+                    security_code_data = 0   
+                """   
+                #Get qr code 
+                try:
+                    qr_code = Qr.objects.get(employee=employee.id, is_current=True)
+                    qr_code_data = SecurityCodeSerializer(qr_code).data 
+                    qr_code_data["qr_image"] = urljoin(request.build_absolute_uri(), qr_code.qr_image.url)
+                except SecurityCode.DoesNotExist:
+                    # If no security code is found, set security_code_data to 0
+                    qr_code_data = {} 
+                    """
                 user_data = {
                     "user":{
                     'id':user.id,
@@ -394,14 +403,15 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     'adresse':user.adresse,
                     'description':user.description,
                     'profession':user.profession, 
-                    } ,
-                    "id":employee.id,
+                    },
+                    "id": employee.id,
                     "is_active": employee.is_active,
                     "date_created_at" : employee.date_created_at, 
                     "date_updated_at" : employee.date_updated_at,
                     "enterprise": enterpise_serializer.data, 
                     "faces": serialized_faces, 
-                    "security_code": security_code_data
+                    "security_code": security_code_data, 
+                    "qr_code":""
                 }
                 employee_data.append(user_data) 
             return Response({"employees":employee_data,"msg":"success"}, status=status.HTTP_200_OK)
@@ -481,7 +491,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 class FacesViewSet(viewsets.ModelViewSet):
     serializer_class = FacesSerializer
     permission_classes = [IsAuthenticated]
-    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = Face.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -525,18 +535,15 @@ class FacesViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(all_image_for_employee, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST) 
+        
     def update(self, request, *args, **kwargs):
-        user = request.user
-        try:
+        user = request.user 
+        try: 
             picture_id = self.kwargs.get("picture_id")
-            print(picture_id)
             employee = self.kwargs.get("employee")
-            print(employee)
             instance = Face.objects.get(id=picture_id)
-            print(instance)
             serializer = self.serializer_class(instance=instance, data=request.data)
-            print("'m on it'")
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -639,7 +646,6 @@ class QrViewset(viewsets.ModelViewSet):
                 employee=employee_instance,
                 is_current=bool(request.data.get("is_current"))
             )
-            print("c'est ici")
             qr_instance.qr_image.save(f"qrcode_{qr_instance.id}.png", ContentFile(buffer.getvalue()))
 
             # Ajouter l'URL vers l'image du code QR dans la réponse
@@ -655,7 +661,7 @@ class QrViewset(viewsets.ModelViewSet):
 class SecurityCodeViewset(viewsets.ModelViewSet):
     serializer_class = SecurityCodeSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = SecurityCode.objects.all()
 
     def create(self, request, *args, **kwargs):

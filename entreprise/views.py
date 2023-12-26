@@ -377,17 +377,29 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     security_code_data = SecurityCodeSerializer(employee_security_code).data
                 except SecurityCode.DoesNotExist:
                     # If no security code is found, set security_code_data to 0
-                    security_code_data = 0   
-                """   
+                    security_code_data = 0    
+                    
                 #Get qr code 
                 try:
                     qr_code = Qr.objects.get(employee=employee.id, is_current=True)
-                    qr_code_data = SecurityCodeSerializer(qr_code).data 
+                    qr_code_data = QrSerializer(qr_code).data 
+                    print("Im here") 
                     qr_code_data["qr_image"] = urljoin(request.build_absolute_uri(), qr_code.qr_image.url)
-                except SecurityCode.DoesNotExist:
+                except Qr.DoesNotExist:
                     # If no security code is found, set security_code_data to 0
                     qr_code_data = {} 
-                    """
+                
+                #Get employee room 
+                employeeRooms_data = []
+                try:
+                    employeeRooms = EmployeeRoom.objects.filter (employee = employee.id)
+                    for employeeRoom in employeeRooms:
+                        employee_room_serializer = EmployeeRoomSerializer(employeeRoom)
+                        employeeRooms_data.append(employee_room_serializer.data)
+                except EmployeeRoom.DoesNotExist:
+                    employeeRooms_data = [] 
+                    
+                    
                 user_data = {
                     "user":{
                     'id':user.id,
@@ -411,14 +423,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                     "enterprise": enterpise_serializer.data, 
                     "faces": serialized_faces, 
                     "security_code": security_code_data, 
-                    "qr_code":""
-                }
+                    "qr_code":qr_code_data,
+                    "rooms": employeeRooms_data
+                } 
+                
                 employee_data.append(user_data) 
             return Response({"employees":employee_data,"msg":"success"}, status=status.HTTP_200_OK)
         except Employee.DoesNotExist:
             return Response({"error": "Employee not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
     def destroy(self, request, *args, **kwargs):
@@ -589,7 +604,7 @@ class RoomViewset(viewsets.ModelViewSet):
 class EmployeeRoomViewset(viewsets.ModelViewSet):
     serializer_class = EmployeeRoomSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = EmployeeRoom.objects.all()
 
     def create(self, request, *args, **kwargs):

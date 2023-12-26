@@ -169,7 +169,7 @@ class Face(models.Model):
     __metaclass__ = ModelBasic
     is_main = models.BooleanField(default=False)
     status = models.BooleanField(default=False)
-    face_file = models.ImageField(default="default.png", upload_to='statics/')
+    face_file = models.FileField(default="default.png", upload_to='statics/')
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
 
     def __str__(self):

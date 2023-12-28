@@ -612,7 +612,7 @@ class EmployeeRoomViewset(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response({"data":serializer.data,"msg":"success"}, status=status.HTTP_201_CREATED)
             else:
                 return Response({"error": f"{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -237,7 +237,7 @@ class EmployeeRoomSerializer(serializers.ModelSerializer):
             return data
         except SystemAdmin.DoesNotExist:
             try:
-                entreprise_creatrice = Enterprise.objects.get(creator=user)
+                entreprise_creatrice = Enterprise.objects.filter(creator=user)
                 return data
             except Enterprise.DoesNotExist:
                 try:

@@ -261,6 +261,7 @@ class EnterpriseAskValidationView(viewsets.ModelViewSet):
             return Response(data="Enterprise is not found",
                             status=status.HTTP_404_NOT_FOUND)
 
+
 ################################# Employee viewset ############################################
 
 

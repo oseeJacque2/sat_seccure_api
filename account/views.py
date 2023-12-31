@@ -211,6 +211,36 @@ class CompleteUserInformationView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+####################################### Complete user informations by userId ########################################### 
+
+class CompleteUserInforByUserIdView(APIView):
+    serializer_class = CompleteUserInformationSerializer
+    permission_classes = [IsAuthenticated]
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+    
+    @swagger_auto_schema(
+        operation_description="Endpoint Login",
+        request_body= CompleteUserInformationSerializer
+
+    )
+    def post(self,  request, *args, **kwargs):
+        try:
+            print("hahah"*100)
+            userId = kwargs.get("userId")
+            user = Custom_User.objects.get(id=userId)
+
+            # Use the serializer to update user information
+            serializer = CompleteUserInformationSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"msg": "User information updated successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Custom_User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # Change password whan user is authenticated
 class UserChangePasswordView(APIView):
     serializer_class = UserChangePasswordSerializer

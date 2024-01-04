@@ -20,9 +20,11 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework.routers import DefaultRouter
+from django.conf import settings
+from django.conf.urls.static import static
 
 
-from entreprise.views import EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
+from entreprise.views import EconomicSectorViewSet, EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
 
 
 ...
@@ -52,6 +54,8 @@ EnterpriseAdminRole_router.register(r"Enterprise", EnterpriseAdminRoleViewSet, b
 EnterpriseAdmin_router = DefaultRouter()
 EnterpriseAdmin_router.register(r"Enterprise",     EnterpriseAdminViewSet, basename="EnterpriseAdmin")
 
+router = DefaultRouter()
+router.register(r'economicsectors', EconomicSectorViewSet, basename='economicsector')
 
 
 schema_view = get_schema_view(
@@ -87,6 +91,8 @@ urlpatterns = [
     path('qr/', include(qr_router.urls), name="Qr"), 
     path('security_Code/', include(SecurityCode_router.urls), name="Security Code"),
     path('enterprise_admin_role/', include(EnterpriseAdminRole_router.urls), name="Enterprise Admin Role"),
-    path('enterprise_admin/', include(EnterpriseAdmin_router.urls), name="Enterprise Admin "),
+    path('enterprise_admin/', include(EnterpriseAdmin_router.urls), name="Enterprise Admin "), 
+    path('economie/', include(router.urls), name= "Economic Sector activity"),
 
-]
+
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

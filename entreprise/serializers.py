@@ -1,4 +1,4 @@
-from .models import Country, EnterpriseAdmin, Enterprise, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
+from .models import Country, EconomicSector, EnterpriseAdmin, Enterprise, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
 from rest_framework import serializers
 from django.db import models
@@ -419,4 +419,7 @@ class EnterpriseAdminRoleSerializer(serializers.ModelSerializer):
         else:
             return data
 
-
+class EconomicSectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EconomicSector
+        fields = '__all__'

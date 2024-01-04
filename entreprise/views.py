@@ -15,9 +15,9 @@ import qrcode
 from urllib.parse import urljoin
 from swan_project import settings
 
-from .models import Country, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
+from .models import Country, EconomicSector, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
-from .serializers import CompletEnterpiseInformationSerializer, CountrySerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
+from .serializers import CompletEnterpiseInformationSerializer, CountrySerializer, EconomicSectorSerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
     EnterpriseUpdateSerializer, EnterpriseValidationSerializer, EntrepriseAdminSerializer, EnterpriseCreateSerializer, \
     EmployeeSerializer, CreateEmployeeSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
     EmployeeRoomSerializer, QrSerializer, SecurityCodeSerializer, EnterpriseAdminRoleSerializer
@@ -384,7 +384,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                 try:
                     qr_code = Qr.objects.get(employee=employee.id, is_current=True)
                     qr_code_data = QrSerializer(qr_code).data 
-                    print("Im here") 
                     qr_code_data["qr_image"] = urljoin(request.build_absolute_uri(), qr_code.qr_image.url)
                 except Qr.DoesNotExist:
                     # If no security code is found, set security_code_data to 0
@@ -731,5 +730,12 @@ class EnterpriseAdminRoleViewSet(viewsets.ModelViewSet):
 class EnterpriseAdminViewSet(viewsets.ModelViewSet):
     queryset = EnterpriseAdmin.objects.all()
     serializer_class = EntrepriseAdminSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+
+
+class EconomicSectorViewSet(viewsets.ModelViewSet):
+    queryset = EconomicSector.objects.all()
+    serializer_class = EconomicSectorSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)

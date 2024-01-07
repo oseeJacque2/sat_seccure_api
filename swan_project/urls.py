@@ -92,7 +92,7 @@ urlpatterns = [
     path('security_Code/', include(SecurityCode_router.urls), name="Security Code"),
     path('enterprise_admin_role/', include(EnterpriseAdminRole_router.urls), name="Enterprise Admin Role"),
     path('enterprise_admin/', include(EnterpriseAdmin_router.urls), name="Enterprise Admin "), 
-    path('economie/', include(router.urls), name= "Economic Sector activity"),
+    path('economie/', include(router.urls), name= "Economic Sector activityg"),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

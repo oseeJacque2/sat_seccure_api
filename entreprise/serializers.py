@@ -40,7 +40,18 @@ class EntrepriseAdminSerializer(serializers.ModelSerializer):
 class EnterpriseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enterprise
-        fields = '__all__'
+        fields = '__all__' 
+        
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     request = self.context.get('request')
+
+    #     # Ajouter les URLs des fichiers aux données sérialisées
+    #     data['director_card_file_url'] = request.build_absolute_uri(instance.director_card_file.url)
+    #     data['rccm_file_url'] = request.build_absolute_uri(instance.rccm_file.url)
+    #     data['logo_url'] = request.build_absolute_uri(instance.logo.url)
+
+    #     return data
 
 ################################################# Complete enterprise information Serializer ################################################### 
 class CompletEnterpiseInformationSerializer(serializers.ModelSerializer):
@@ -62,7 +73,16 @@ class CompletEnterpiseInformationSerializer(serializers.ModelSerializer):
             instance.rcm = validated_data.get('rcm', instance.rcm)
             instance.email = validated_data.get('email', instance.email)
             instance.save()
-            return instance
+            return instance 
+        
+#################################################### Add Enterprise Docs Serilizer############################################  
+class AddEnterpriseDocumentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enterprise
+        fields = ['director_card_file', 'rccm_file','logo']
+        
+        
+        
 class EnterpriseRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enterprise

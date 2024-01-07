@@ -17,7 +17,7 @@ from swan_project import settings
 
 from .models import Country, EconomicSector, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
-from .serializers import CompletEnterpiseInformationSerializer, CountrySerializer, EconomicSectorSerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
+from .serializers import AddEnterpriseDocumentsSerializer, CompletEnterpiseInformationSerializer, CountrySerializer, EconomicSectorSerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
     EnterpriseUpdateSerializer, EnterpriseValidationSerializer, EntrepriseAdminSerializer, EnterpriseCreateSerializer, \
     EmployeeSerializer, CreateEmployeeSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
     EmployeeRoomSerializer, QrSerializer, SecurityCodeSerializer, EnterpriseAdminRoleSerializer
@@ -52,7 +52,7 @@ class EnterpriseCreateWithoutRegisterView(APIView):
     """
     serializer_classs = EnterpriseCreateSerializerWithoutRegister
     permission_classes = [AllowAny]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
     @swagger_auto_schema(
         operation_description="",
@@ -88,7 +88,7 @@ class EnterpriseCreateWithoutRegisterView(APIView):
 class CompleteEnterpriseInformationView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CompletEnterpiseInformationSerializer
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     
     @swagger_auto_schema(
         operation_description="Auth_entreprise_login",
@@ -109,12 +109,34 @@ class CompleteEnterpriseInformationView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+class AddEnterpriseDocumentsView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddEnterpriseDocumentsSerializer
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     
+    @swagger_auto_schema(
+        operation_description="Add documents  for Enterprise ",
+        request_body=AddEnterpriseDocumentsSerializer
+    ) 
+    def post(self, request, enterprise_id, *args, **kwargs):
+        try:
+            enterprise = Enterprise.objects.get(pk=enterprise_id)
+        except Enterprise.DoesNotExist:
+            return Response({"error": "Enterprise not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AddEnterpriseDocumentsSerializer(instance=enterprise, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Enterprise information updated successfully", "enterprise": serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        
     
 class EnterpriseLoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = UserLoginSerializer
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
     @swagger_auto_schema(
         operation_description="Auth_entreprise_login",
@@ -506,7 +528,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 class FacesViewSet(viewsets.ModelViewSet):
     serializer_class = FacesSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     queryset = Face.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -738,4 +760,4 @@ class EconomicSectorViewSet(viewsets.ModelViewSet):
     queryset = EconomicSector.objects.all()
     serializer_class = EconomicSectorSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)

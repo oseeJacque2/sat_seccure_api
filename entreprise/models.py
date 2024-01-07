@@ -79,14 +79,15 @@ class Enterprise(models.Model):
     ifu = models.CharField(max_length=255, default=" ")
     rcm = models.CharField(max_length=255, default=" ")
     director_card_id = models.CharField(max_length=255, default=" ")
-    director_card_file = models.ImageField(default='default.png', upload_to='statics/')
+    director_card_file = models.ImageField(default='default_rccm.png', upload_to='statics/')
+    rccm_file = models.ImageField(default='default.png', upload_to='statics/')
     director_card_type = models.CharField(max_length=255, choices=CARD_TYPES, default='CNI')
     director_fullname = models.CharField(max_length=255, default="String"), 
     director_lastname = models.CharField(max_length=255, default="String")  # Corrected field name
     director_firstname = models.CharField(max_length=255, default="String")  # Corrected field name
     phone = models.CharField(max_length=255, default="String")
     is_approved = models.BooleanField(default=False)
-    logo = models.ImageField(default='default.png', upload_to='statics/')
+    logo = models.ImageField(default='default_logo.png', upload_to='statics/')
     status = models.IntegerField(default=0)
     description = models.CharField(max_length=255, default='String')
     adress = models.CharField(max_length=255, default='String')

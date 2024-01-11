@@ -34,6 +34,11 @@ SEXE_CHOICES=(
     ("AUCUN", "AUCUN")
 )
 
+ACCESS_MODE = [
+    ('Qr code',"Qr Code"), 
+    ('Security code', "Code de Sécurity"),
+    ('Face','Visage')
+]
 
 #Base modelClass
 class ModelBasic():
@@ -209,7 +214,19 @@ class EmployeeStatusLog(models.Model):
     employee_log = models.ForeignKey(Employee, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.employee_log}"
+        return f"{self.employee_log}" 
+    
+
+
+
+################################## Access Model #################################################### 
+
+class AccesModel (models.Model):
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE) 
+    room = models.ForeignKey(Room, on_delete=models.CASCADE) 
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
+    access_mode = models.CharField(max_length=255,choices = ACCESS_MODE, default ='Visage') 
+    
 
 
 

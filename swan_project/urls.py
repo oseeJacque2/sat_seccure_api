@@ -24,7 +24,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-from entreprise.views import EconomicSectorViewSet, EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
+from entreprise.views import AccesModelCreateView, EconomicSectorViewSet, EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
 
 
 ...
@@ -56,6 +56,9 @@ EnterpriseAdmin_router.register(r"Enterprise",     EnterpriseAdminViewSet, basen
 
 router = DefaultRouter()
 router.register(r'economicsectors', EconomicSectorViewSet, basename='economicsector')
+
+access_router = DefaultRouter()
+access_router.register(r"", AccesModelCreateView, basename="Access")
 
 
 schema_view = get_schema_view(
@@ -93,6 +96,9 @@ urlpatterns = [
     path('enterprise_admin_role/', include(EnterpriseAdminRole_router.urls), name="Enterprise Admin Role"),
     path('enterprise_admin/', include(EnterpriseAdmin_router.urls), name="Enterprise Admin "), 
     path('economie/', include(router.urls), name= "Economic Sector activityg"),
+    path('acces/', include(access_router.urls), name="Access"), 
+    #path('acces/stream/', AccesModelCreateView.as_view({'get': 'get_access_real_time'}), name= "Access information real time"), 
+
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

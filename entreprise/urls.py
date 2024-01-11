@@ -17,7 +17,6 @@ urlpatterns = [
     path('complete_infor/<enterprise_id>/', CompleteEnterpriseInformationView.as_view(), name="complete_enterprise_information"),
     path('add_documents/<enterprise_id>/', AddEnterpriseDocumentsView.as_view(), name="Add enterprise documents "),
 
-    path('download-face-file/<int:face_id>/', download_face_file, name='download-face-file'),
 
 
 ]

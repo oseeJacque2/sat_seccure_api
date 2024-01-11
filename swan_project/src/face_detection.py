@@ -63,16 +63,20 @@ def get_emotion(image):
 
 #Convert image to Numpy _array
 def convert_image_to_numpy_array(image_path):
-    """This function allow to convert image to numpy table
+    """This function allows converting an image to a numpy array.
 
     Args:
-        image_path (String):The path of the image
+        image_path (str): The path of the image.
 
     Returns:
-        numpy.array: numpy.array from image
+        numpy.array: Numpy array representing the grayscale image.
     """
+    # Ouvrir l'image en niveaux de gris
     pil_image = Image.open(image_path).convert("L")
-    image_array = np.array(pil_image, "uint8")
+
+    # Transformer l'image en tableau numpy
+    image_array = np.array(pil_image, dtype=np.uint8)
+
     return image_array
 
 

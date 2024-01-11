@@ -1,4 +1,4 @@
-from .models import Country, EconomicSector, EnterpriseAdmin, Enterprise, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
+from .models import AccesModel, Country, EconomicSector, EnterpriseAdmin, Enterprise, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
 from rest_framework import serializers
 from django.db import models
@@ -442,4 +442,13 @@ class EnterpriseAdminRoleSerializer(serializers.ModelSerializer):
 class EconomicSectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = EconomicSector
+        fields = '__all__' 
+        
+        
+##############################################################  Access Model Serializer ###########################################################
+
+
+class AccesModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccesModel
         fields = '__all__'

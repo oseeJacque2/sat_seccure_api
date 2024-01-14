@@ -25,6 +25,7 @@ from django.conf.urls.static import static
 
 
 from entreprise.views import AccesModelCreateView, EconomicSectorViewSet, EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
+from swan_project import consumers
 
 
 ...
@@ -98,7 +99,7 @@ urlpatterns = [
     path('economie/', include(router.urls), name= "Economic Sector activityg"),
     path('acces/', include(access_router.urls), name="Access"), 
     #path('acces/stream/', AccesModelCreateView.as_view({'get': 'get_access_real_time'}), name= "Access information real time"), 
-
+    re_path(r'ws/camera/', consumers.CameraConsumer.as_asgi(), name='camera_ws'),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

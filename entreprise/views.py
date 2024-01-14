@@ -3,6 +3,7 @@ import cv2
 from django.contrib.auth.hashers import check_password
 from django.db.migrations import serializer
 from django.http import HttpResponse
+from django.shortcuts import render
 from rest_framework import viewsets, status, parsers
 from rest_framework.decorators import authentication_classes, action
 from rest_framework.generics import get_object_or_404
@@ -812,4 +813,8 @@ class AccesModelCreateView(viewsets.ModelViewSet):
 
         # Ajouter la logique pour prendre la capture ici si nécessaire
 
-        return Response({'message': 'Liste des visages envoyée en temps réel'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Liste des visages envoyée en temps réel'}, status=status.HTTP_200_OK) 
+    
+
+def lobby(request):
+    return render(request,'chat/lobby.html')

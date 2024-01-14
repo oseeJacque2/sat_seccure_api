@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'drf_yasg',
     'jazzmin',
     'django.contrib.admin',
@@ -48,6 +49,8 @@ INSTALLED_APPS = [
     'admins',
     'rest_framework_simplejwt',
 ]
+
+ASGI_APPLICATION = 'swan_project.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

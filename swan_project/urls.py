@@ -25,7 +25,7 @@ from django.conf.urls.static import static
 
 
 from entreprise.views import AccesModelCreateView, EconomicSectorViewSet, EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
-from swan_project import consumers
+from entreprise import consumers
 
 
 ...

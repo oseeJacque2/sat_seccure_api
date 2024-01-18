@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+import cv2
 from pyzbar.pyzbar import decode
 
 
@@ -29,4 +30,20 @@ def read_qr_code(image_path):
             return None
     except Exception as e:
         print(f"An error occurred while reading the QR code: {str(e)}")
-        return None
+        return None 
+    
+
+def detect_qr_code(image_array):
+    # Convertir le tableau NumPy en image OpenCV
+    image = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
+
+    # Détecter les codes QR dans l'image
+    decoded_objects = decode(image)
+
+    # Si des codes QR sont détectés, retourner le premier code QR et True
+    if decoded_objects:
+        qr_content = decoded_objects[0].data.decode('utf-8')
+        return True, qr_content
+    else:
+        # Sinon, retourner False et une chaîne vide
+        return False, ''

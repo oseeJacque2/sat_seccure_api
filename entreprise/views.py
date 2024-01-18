@@ -815,6 +815,3 @@ class AccesModelCreateView(viewsets.ModelViewSet):
 
         return Response({'message': 'Liste des visages envoyée en temps réel'}, status=status.HTTP_200_OK) 
     
-
-def lobby(request):
-    return render(request,'chat/lobby.html')

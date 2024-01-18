@@ -27,12 +27,13 @@ SECRET_KEY = 'django-insecure-b+5ru#wrj!0(=nz-@%d!#80uw3g@fo8_^i8iv6%bknqd%_0l*8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'channels',
     'drf_yasg',
     'jazzmin',
@@ -50,7 +51,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 ]
 
-ASGI_APPLICATION = 'swan_project.asgi.application'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -81,6 +82,8 @@ TEMPLATES = [
     },
 ]
 
+# Daphne
+ASGI_APPLICATION = "swan_project.asgi.application"
 WSGI_APPLICATION = 'swan_project.wsgi.application'
 
 
@@ -133,6 +136,15 @@ SWAGGER_SETTINGS = {
             'in': 'header'
       }
    }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }
 
 REST_FRAMEWORK = {

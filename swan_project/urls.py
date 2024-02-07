@@ -24,7 +24,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-from entreprise.views import AccesModelCreateView, EconomicSectorViewSet, EnterpriseViewSet, EmployeeViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
+from entreprise.views import AccesModelCreateView, BreakRequestViewSet, DocumentCopyRequestViewSet, EconomicSectorViewSet, EnterpriseScheduleEnterViewSet, EnterpriseViewSet, EmployeeViewSet, LeaveRequestViewSet, ModifyEmployeeDataRequestViewSet, PermissionRequestViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
 from entreprise import consumers
 
 
@@ -60,6 +60,15 @@ router.register(r'economicsectors', EconomicSectorViewSet, basename='economicsec
 
 access_router = DefaultRouter()
 access_router.register(r"", AccesModelCreateView, basename="Access")
+router = DefaultRouter()
+router.register(r'leave-request', LeaveRequestViewSet, basename='leave-request')
+router.register(r'break-request', BreakRequestViewSet, basename='break-request')
+router.register(r'permission-request', PermissionRequestViewSet, basename='permission-request')
+router.register(r'document-copy-request', DocumentCopyRequestViewSet, basename='document-copy-request')
+router.register(r'modify-employee-data-request', ModifyEmployeeDataRequestViewSet, basename='modify-employee-data-request')
+schedul_router = DefaultRouter()
+
+schedul_router.register(r'enterprise-schedules-enter', EnterpriseScheduleEnterViewSet, basename='Schedule')
 
 
 schema_view = get_schema_view(
@@ -90,6 +99,9 @@ urlpatterns = [
     #Goupe urls
     path('employee/', include("entreprise.employee_urls"), name="Employee"),
     #path('employee/', include(Employee_router.urls), name="Security Code"),
+    path('request/', include(router.urls)),
+    path('schedule/', include(schedul_router.urls)),
+
     path('room/', include(room_router.urls), name="Rooms"),
     path('employee_room/', include(employee_room_router.urls), name="Employee room"),
     path('qr/', include(qr_router.urls), name="Qr"), 

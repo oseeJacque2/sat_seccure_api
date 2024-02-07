@@ -1,12 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import EnterpriseLoginView, EnterpriseCreateWithoutRegisterView, EnterpriseViewSet, \
-    EnterpriseAskValidationView, FacesViewSet, EmployeeViewSet
+from .views import EnterpriseViewSet, EmployeeViewSet
 
 router = DefaultRouter()
-enterprise_vieset_router = DefaultRouter()
-
-enterprise_vieset_router.register('', EnterpriseViewSet, basename='enterprise')
+router.register('enterprise', EnterpriseViewSet, basename='enterprise')
+router.register('employee', EmployeeViewSet, basename='employee')
 
 urlpatterns = [
     path('enterprise/<int:enterprise_id>/create/', EmployeeViewSet.as_view({'post': 'create'}), name='Create Employee in enterprise'),

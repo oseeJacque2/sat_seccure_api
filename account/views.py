@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
+from entreprise.models import EconomicSector
 
 from entreprise.serializers import EnterpriseSerializer, EnterpriseRegisterSerializer
 from .models import Custom_User,ActivationCode
@@ -52,21 +53,26 @@ class UserRegistrationView(generics.CreateAPIView):
             if serializer.is_valid(raise_exception=True):
                 user = serializer.save()
 
-                #Let's create enterprise
-                if user and user.id:
-                    enterprise_name = serializer.validated_data.get('enterprise_name', '')
+                # Recherchez un secteur par défaut existant dans la base de données
+                default_sector = EconomicSector.objects.filter(sectorname="Default Sector").first()
+             
+
+                # Créez l'entreprise avec le secteur par défaut
+                if user and user.id and default_sector:
                     enterprise_data = {
                         'creator': user.id,
                         'name': enterprise_name,
+                        'sectors': [default_sector.id],  # Ajoutez le secteur par défaut
                     }
+                    
                 enterprise_serializer = EnterpriseRegisterSerializer(data=enterprise_data)
                 if enterprise_serializer.is_valid():
                     enterprise_serializer.save()
                     return Response({"msg": "Registration successful. Active now your account"}, status=status.HTTP_201_CREATED)
                 else:
+                    print("Enterprise serializer errors:", enterprise_serializer.errors)
                     user.delete()
                     return Response(enterprise_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         except Exception as e:
             return Response({"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -130,10 +136,10 @@ class UserLoginView(APIView):
         email = serializer.data.get('email')
         password = serializer.data.get('password')
         user = Custom_User.objects.get(email=email)
-        print(user)
-        # user = authenticate(email=email, password=password)
-
+        
         if user is not None:
+            print(password)
+            print(user.password)
             if check_password(password, user.password):
                 token = get_tokens_for_user(user)
                 print(user.password)
@@ -151,6 +157,7 @@ class UserLoginView(APIView):
                     'adresse': user.adresse,
                     'description': user.description,
                     'profession': user.profession,
+                    'isValidat':user.is_validate
                 }
                 return Response({'token': token, 'user': user_data, 'msg': 'Login Sucess'}, status=status.HTTP_200_OK)
 

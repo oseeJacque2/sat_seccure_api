@@ -2,7 +2,8 @@ import os
 from PIL import Image
 import cv2
 from pyzbar.pyzbar import decode
-
+from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 
 
 def read_qr_code(image_path):
@@ -32,7 +33,7 @@ def read_qr_code(image_path):
         print(f"An error occurred while reading the QR code: {str(e)}")
         return None 
     
-
+@sync_to_async
 def detect_qr_code(image_array):
     # Convertir le tableau NumPy en image OpenCV
     image = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)

@@ -8,7 +8,6 @@ router = DefaultRouter()
 enterprise_vieset_router = DefaultRouter()
 
 enterprise_vieset_router.register('', EnterpriseViewSet, basename='enterprise')
-
 urlpatterns = [
     #path('login/', EnterpriseLoginView.as_view()),
     path('registerbase/', EnterpriseCreateWithoutRegisterView.as_view(), name='Create entreprise without having account'),

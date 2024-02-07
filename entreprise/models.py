@@ -5,8 +5,6 @@ from django.db import models
 # Create your models here.
 from django.db import models
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.auth.models import AbstractUser, PermissionsMixin
-from django.utils import timezone
 
 from account.models import Custom_User
 
@@ -38,6 +36,36 @@ ACCESS_MODE = [
     ('Qr code',"Qr Code"), 
     ('Security code', "Code de Sécurity"),
     ('Face','Visage')
+]
+
+REQUEST_TYPES = [
+    ('LEAVE', 'Leave'),
+    ('PERMISSION', 'Permission'),
+    ('DOCUMENT_COPY', 'Document Copy'),
+    ('MODIFY_EMPLOYEE_DATA', 'Modify Employee Data'),
+]
+
+DOCUMENT_TYPES = [
+    ('WORK_CERTIFICATE', 'Work Certificate'),
+    ('EMPLOYMENT_CONTRACT', 'Employment Contract'),
+    ('PAYSLIP', 'Payslip'),
+]
+
+LEAVE_TYPES = [
+    ('ANNUAL_LEAVE', 'Annual Leave'),
+    ('SICK_LEAVE', 'Sick Leave'),
+    ('UNPAID_LEAVE', 'Unpaid Leave'),
+]
+
+TYPE_EVENEMENTS = [
+    ('ARRIVEE', 'Arrival'),
+    ('DEPART', 'Departure'),
+]
+
+TYPE_MODIFICATION_DATA_EMPLOYE = [
+    ('PICTURE', 'Picture'),
+    ('QR_CODE', 'QR Code'),
+    ('SECURITY_CODE', 'Security Code'),
 ]
 
 #Base modelClass
@@ -104,34 +132,6 @@ class Enterprise(models.Model):
         return f"{self.name}"
 
 
-
-##############################  Entreprise Admin    ###################################
-
-class EnterpriseAdmin(models.Model):
-    __metaclass__ = ModelBasic
-    user = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=True)
-    job = models.CharField(max_length=100)
-    job_description = models.CharField(max_length=100)
-    enterprises = models.ManyToManyField(Enterprise)
-    roles = models.OneToOneField(Role, on_delete=models.CASCADE, default=1)
-
-    def __str__(self):
-        return f"{self.user}"
-
-
-################################# Entreprise admin rôle     ################################"
-
-class EnterpriseAdminRole(models.Model):
-    __metaclass__ = ModelBasic
-    is_active = models.BooleanField(default=False)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-    entreprise_admin = models.ForeignKey(EnterpriseAdmin, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.role}"
-
-
 ##########################  class Employee  ##################################
 class Employee(models.Model):
     user = models.OneToOneField(Custom_User, on_delete=models.CASCADE)
@@ -143,6 +143,34 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.user}"
+##############################  Entreprise Admin    ###################################
+class EnterpriseAdmin(models.Model):
+    __metaclass__ = ModelBasic
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    job = models.CharField(max_length=100)
+    job_description = models.CharField(max_length=100)
+    enterprises = models.ManyToManyField(Enterprise)
+    roles = models.OneToOneField(Role, on_delete=models.CASCADE, default=1)
+
+    def __str__(self):
+        return f"{self.user}" 
+
+
+################################# Entreprise admin rôle     ################################"
+
+class EnterpriseAdminRole(models.Model):
+    __metaclass__ = ModelBasic
+    is_active = models.BooleanField(default=False)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    entreprise_admin = models.ForeignKey(EnterpriseAdmin, on_delete=models.CASCADE)
+    enterprise = models.ForeignKey(Enterprise,on_delete = models.CASCADE)
+
+    def __str__(self):
+        return f"{self.role}"
+
+
+
 
 
 ################################# Class Qr  ############################
@@ -220,14 +248,99 @@ class EmployeeStatusLog(models.Model):
 
 
 ################################## Access Model #################################################### 
-
 class AccesModel (models.Model):
     employee = models.ForeignKey(Employee,on_delete=models.CASCADE) 
     room = models.ForeignKey(Room, on_delete=models.CASCADE) 
     enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
-    access_mode = models.CharField(max_length=255,choices = ACCESS_MODE, default ='Visage') 
+    access_mode = models.CharField(max_length=255,choices = ACCESS_MODE, default ='Visage')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
 
 
+############################# LeaveRequest  Model (Congées) ################################"
+class LeaveRequest(models.Model,ModelBasic):
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE) 
+    enterprise = models.ForeignKey(Enterprise,on_delete=models.CASCADE)
+    leave_type = models.CharField(max_length=20, choices=LEAVE_TYPES, default = "Sick Leave") 
+    reason = models.TextField()
+    start_at = models.DateField()
+    end_at = models.DateField() 
+    is_approuve = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Permission Request #{self.id}" 
+    
+    
+################################  Break Request  (Pause) ################################
+class BreakRequest(models.Model, ModelBasic):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
+    reason = models.TextField()
+    start_at = models.DateTimeField()
+    end_at = models.DateTimeField()
+    is_approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Break Request #{self.id}" 
+    
+################################# Permission Request (Permission urgent) ################## 
+class PermissionRequest(models.Model, ModelBasic):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
+    reason = models.TextField()
+    start_at = models.DateTimeField()
+    end_at = models.DateTimeField()
+    is_approved = models.BooleanField(default=False) 
+    
+    def __str__(self):
+        return f"Permission Request #{self.id}"
+ 
+ 
+ ############################## Document Copy Request (Demander les copies des documents) ################################## 
+class DocumentCopyRequest(models.Model, ModelBasic):
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES,default = "Work Certificate")
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE) 
+    comment = models.TextField()
+    
+    def __str__(self):
+        return f"Document Copy Request #{self.id}" 
+    
+
+######################################## Modify Employee Data Request############################
+class ModifyEmployeeDataRequest(models.Model, ModelBasic):
+    type_modification = models.CharField(max_length=20, choices = TYPE_MODIFICATION_DATA_EMPLOYE,default = "picture")
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE) 
+    new_data = models.CharField(max_length=255)
+    document = models.FileField(upload_to='employee_data_requests/', null=True, blank=True)
+    reason = models.TextField()
+
+    def __str__(self):
+        return f"Modify Employee Data Request #{self.id}"
+ 
 
 
+#################################### Shedule Form ###############################################
+class EnterpriseScheduleEnter(models.Model, ModelBasic):
+    start_at = models.DateField()
+    end_at = models.DateField()
+    task_to_do = models.TextField()
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"Enterprise Schedule enter #{self.id}" 
+    
+
+class EnterpriseSchedule(models.Model, ModelBasic):
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    #schedule_enter = models.ManyToManyField(EnterpriseScheduleEnter,default = [])
+    start_at = models.DateField()
+    end_at = models.DateField()
+    task_to_do = models.TextField()
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"Enterprise Schedule #{self.id}"

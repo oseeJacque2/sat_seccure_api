@@ -1,7 +1,10 @@
-from .models import AccesModel, Country, EconomicSector, EnterpriseAdmin, Enterprise, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
+from entreprise.utils import check_access
+from .models import AccesModel, BreakRequest, Country, DocumentCopyRequest, EconomicSector, EnterpriseAdmin, Enterprise, Employee, EnterpriseScheduleEnter, Face, LeaveRequest, ModifyEmployeeDataRequest, PermissionRequest, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
 from rest_framework import serializers
 from django.db import models
+from django.contrib.auth.hashers import make_password
+
 
 from account.models import Custom_User
 
@@ -24,15 +27,16 @@ class EntrepriseAdminSerializer(serializers.ModelSerializer):
     def validate(self,data):
         user = self.context['request'].user
 
-        try:
-            system_admin = SystemAdmin.objects.get(user_admin=user)
-            return data
-        except SystemAdmin.DoesNotExist:
-            try:
-                entreprise_creatrice = Enterprise.objects.get(creator=user)
-                return data
-            except Enterprise.DoesNotExist:
-                raise  serializers.ValidationError("You have not permission to do this action")
+        # try:
+        #     system_admin = SystemAdmin.objects.get(user_admin=user)
+        #     return data
+        # except SystemAdmin.DoesNotExist:
+        #     try:
+        #         entreprise_creatrice = Enterprise.objects.get(creator=user)
+        #         return data
+        #     except Enterprise.DoesNotExist:
+        #         raise  serializers.ValidationError("You have not permission to do this action")
+        return data 
 
 
 
@@ -86,7 +90,7 @@ class AddEnterpriseDocumentsSerializer(serializers.ModelSerializer):
 class EnterpriseRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enterprise
-        fields = ['name', 'creator'] 
+        fields = ['name', 'creator']
         
 
 ##################################Enterprise create Serializer #####################################################
@@ -98,22 +102,23 @@ class EnterpriseCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         request_method = self.context['request'].method
-        if request_method == "put" or request_method == "patch" or request_method == "delete" \
-                or request_method == 'post':
-            try:
-                system_admin = SystemAdmin.objects.get(user_admin=user)
-                return data
-            except SystemAdmin.DoesNotExist:
-                try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
-                    return data
-                except Enterprise.DoesNotExist:
-                    try:
-                        entreprise_admin = EnterpriseAdmin.objects.get(user=user)
-                    except EnterpriseAdmin.DoesNotExist:
-                        raise serializers.ValidationError("You have not permission to this action")
-        else:
-            return data
+        # if request_method == "put" or request_method == "patch" or request_method == "delete" \
+        #         or request_method == 'post':
+        #     try:
+        #         system_admin = SystemAdmin.objects.get(user_admin=user)
+        #         return data
+        #     except SystemAdmin.DoesNotExist:
+        #         try:
+        #             entreprise_creatrice = Enterprise.objects.get(creator=user)
+        #             return data
+        #         except Enterprise.DoesNotExist:
+        #             try:
+        #                 entreprise_admin = EnterpriseAdmin.objects.get(user=user)
+        #             except EnterpriseAdmin.DoesNotExist:
+        #                 raise serializers.ValidationError("You have not permission to this action")
+        # else:
+        #     return data 
+        return data
 
 
 
@@ -153,6 +158,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = '__all__'
 
+
 class CreateEmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Custom_User
@@ -162,31 +168,38 @@ class CreateEmployeeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
 
-        # Vérifier si l'utilisateur est un "system_admin" en fonction de la relation SystemAdmin
-        try:
-            system_admin = SystemAdmin.objects.get(user_admin=user)
-            return data
-        except SystemAdmin.DoesNotExist:
-            try:
-                entreprise_creatrice = Enterprise.objects.filter(creator=user)
-                return data
-            except Enterprise.DoesNotExist:
-                try:
-                    entreprise_admin = EnterpriseAdmin.objects.get(user=user)
-                except EnterpriseAdmin.DoesNotExist:
-                    raise serializers.ValidationError("L'utilisateur n'a pas les permissions nécessaires.")
+        # # Vérifier si l'utilisateur est un "system_admin" en fonction de la relation SystemAdmin
+        # try:
+        #     system_admin = SystemAdmin.objects.get(user_admin=user)
+        #     return data
+        # except SystemAdmin.DoesNotExist:
+        #     try:
+        #         entreprise_creatrice = Enterprise.objects.filter(creator=user)
+        #         return data
+        #     except Enterprise.DoesNotExist:
+        #         try:
+        #             entreprise_admin = EnterpriseAdmin.objects.get(user=user)
+        #         except EnterpriseAdmin.DoesNotExist:
+        #             raise serializers.ValidationError("L'utilisateur n'a pas les permissions nécessaires.")
 
-                request_method = self.context['request'].method
+        #         request_method = self.context['request'].method
 
-                if request_method == 'POST':
-                    # Vérifier si l'utilisateur a le rôle "EnterpriseAdminRole"
-                    try:
-                        enterprise_admin_role = EnterpriseAdminRole.objects.get(entreprise_admin=entreprise_admin,
-                                                                                role='add_employee')
-                    except EnterpriseAdminRole.DoesNotExist:
-                        raise serializers.ValidationError("L'utilisateur n'a pas le rôle requis.")
+        #         if request_method == 'POST':
+        #             # Vérifier si l'utilisateur a le rôle "EnterpriseAdminRole"
+        #             try:
+        #                 enterprise_admin_role = EnterpriseAdminRole.objects.get(entreprise_admin=entreprise_admin,
+        #                                                                         role='add_employee')
+        #             except EnterpriseAdminRole.DoesNotExist:
+        #                 raise serializers.ValidationError("L'utilisateur n'a pas le rôle requis.")
 
-            return data
+        return data 
+    
+    def create(self, validated_data):
+        # Crypter le mot de passe avant d'enregistrer l'utilisateur
+        validated_data['password'] = make_password(validated_data.get('password'))
+
+        # Appeler la méthode create de la classe mère pour effectuer l'enregistrement réel
+        return super().create(validated_data)
 
 
 class UpdateEmployeeSerializer(serializers.ModelSerializer):
@@ -215,6 +228,7 @@ class FacesSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError("The probality of ressemblance between the images is less than 60%")
 
+
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
@@ -223,27 +237,28 @@ class RoomSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         request_method = self.context['request'].method
-        if request_method == "put" or request_method == "patch" or request_method == "delete" or request_method == "post":
-            try:
-                system_admin = SystemAdmin.objects.get(user_admin=user)
-                return data
-            except SystemAdmin.DoesNotExist:
-                try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
-                    return data
-                except Enterprise.DoesNotExist:
-                    try:
-                            entreprise_admin = EnterpriseAdmin.objects.get(user=user)
-                            try:
-                                enterprise_admin_role = EnterpriseAdminRole.objects.get(entreprise_admin=entreprise_admin,
-                                                                                        role='manage enterprise rooms')
-                                return data
-                            except EnterpriseAdminRole.DoesNotExist:
-                                raise serializers.ValidationError("Yu have not permission to do this task")
-                    except EnterpriseAdmin.DoesNotExist:
-                        raise serializers.ValidationError("You have not permission to this action")
-        else:
-            return data
+        # if request_method == "put" or request_method == "patch" or request_method == "delete" or request_method == "post":
+        #     try:
+        #         system_admin = SystemAdmin.objects.get(user_admin=user)
+        #         return data
+        #     except SystemAdmin.DoesNotExist:
+        #         try:
+        #             entreprise_creatrice = Enterprise.objects.get(creator=user)
+        #             return data
+        #         except Enterprise.DoesNotExist:
+        #             try:
+        #                     entreprise_admin = EnterpriseAdmin.objects.get(user=user)
+        #                     try:
+        #                         enterprise_admin_role = EnterpriseAdminRole.objects.get(entreprise_admin=entreprise_admin,
+        #                                                                                 role='manage enterprise rooms')
+        #                         return data
+        #                     except EnterpriseAdminRole.DoesNotExist:
+        #                         raise serializers.ValidationError("Yu have not permission to do this task")
+        #             except EnterpriseAdmin.DoesNotExist:
+        #                 raise serializers.ValidationError("You have not permission to this action")
+        # else:
+        #     return data
+        return data
 
 
 class EmployeeRoomSerializer(serializers.ModelSerializer):
@@ -416,28 +431,23 @@ class EnterpriseAdminRoleSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context['request'].user
-        request_method = self.context['request'].method
-        if request_method == "put" or request_method == "patch" or request_method == "delete" or request_method == "post":
-            try:
-                system_admin = SystemAdmin.objects.get(user_admin=user)
+        request_method = self.context['request'].method 
+        # Chercher une entreprise dont le créateur est l'utilisateur
+        try:
+            enterprise_creator = Enterprise.objects.get(creator=user)
+            if check_access(user_id=user.id, enterprise_id=enterprise_creator.id, droit="ALL") or check_access(user_id=user.id, enterprise_id=enterprise_creator.id, droit="Manage Administrator"):
                 return data
-            except SystemAdmin.DoesNotExist:
-                try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
+        except Enterprise.DoesNotExist:
+            # Chercher une entreprise où l'utilisateur est employé
+            try:
+                employee = Employee.objects.get(user=user)
+                if check_access(user_id=user.id, enterprise_id=employee.enterprise.id, droit="ALL") or check_access(user_id=user.id, enterprise_id=enterprise_creator.id, droit="Manage Administrator"):
                     return data
-                except Enterprise.DoesNotExist:
-                    try:
-                        entreprise_admin = EnterpriseAdmin.objects.get(user=user)
-                        try:
-                            enterprise_admin_role = EnterpriseAdminRole.objects.get(entreprise_admin=entreprise_admin,
-                                                                                    role='add_interprise_admin')
-                            return data
-                        except EnterpriseAdminRole.DoesNotExist:
-                            raise serializers.ValidationError("Yu have not permission to do this task")
-                    except EnterpriseAdmin.DoesNotExist:
-                        raise serializers.ValidationError("You have not permission to this action")
-        else:
-            return data
+            except Employee.DoesNotExist:
+                raise serializers.ValidationError("L'utilisateur n'a pas les permissions nécessaires.")
+        
+        raise serializers.ValidationError("L'utilisateur n'a pas les permissions nécessaires.")
+
 
 class EconomicSectorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -452,3 +462,43 @@ class AccesModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccesModel
         fields = '__all__'
+
+
+################################  Request Serializer #############################
+
+class LeaveRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeaveRequest
+        fields = '__all__'
+
+
+class BreakRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BreakRequest
+        fields = '__all__' 
+        
+
+class PermissionRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PermissionRequest
+        fields = '__all__' 
+
+
+class DocumentCopyRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentCopyRequest
+        fields = '__all__'
+
+
+class ModifyEmployeeDataRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ModifyEmployeeDataRequest
+        fields = '__all__' 
+        
+        
+class EnterpriseScheduleEnterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EnterpriseScheduleEnter
+        fields = '__all__'
+
+

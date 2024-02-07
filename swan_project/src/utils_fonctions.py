@@ -1,7 +1,10 @@
 
 import cv2
 import numpy as np
+from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 
+@sync_to_async
 def compare_images(image1_array, image2_array):
     """
     Compare deux images en niveaux de gris représentées en tant que tableaux NumPy.

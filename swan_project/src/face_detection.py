@@ -1,9 +1,12 @@
 import cv2
 import numpy as np
 from PIL import Image
+from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 
 
 #Detect face from image function
+@sync_to_async
 def detect_face(image):
     """Detects a face in an image and flips the image with the framed face.
 
@@ -17,10 +20,8 @@ def detect_face(image):
     faces = face_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     if len(faces) == 0:
-        print("No face detect")
         return None
     elif len(faces) > 1:
-        print("We are detecting more than two face")
         return []
     else:
         (x, y, w, h) = faces[0]

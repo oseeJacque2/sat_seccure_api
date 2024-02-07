@@ -18,12 +18,12 @@ import qrcode
 from urllib.parse import urljoin
 from swan_project import settings
 
-from .models import AccesModel, Country, EconomicSector, Enterprise, EnterpriseAdmin, Employee, Face, Room, EmployeeRoom, Qr, SecurityCode, \
+from .models import  AccesModel, BreakRequest, Country, DocumentCopyRequest, EconomicSector, Enterprise, EnterpriseAdmin, Employee, EnterpriseScheduleEnter, Face, LeaveRequest, ModifyEmployeeDataRequest, PermissionRequest, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
     
-from .serializers import AccesModelSerializer, AddEnterpriseDocumentsSerializer, CompletEnterpiseInformationSerializer, CountrySerializer, EconomicSectorSerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
-    EnterpriseUpdateSerializer, EnterpriseValidationSerializer, EntrepriseAdminSerializer, EnterpriseCreateSerializer, \
-    EmployeeSerializer, CreateEmployeeSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
+from .serializers import AccesModelSerializer, AddEnterpriseDocumentsSerializer, BreakRequestSerializer, CompletEnterpiseInformationSerializer, CountrySerializer, DocumentCopyRequestSerializer, EconomicSectorSerializer, EnterpriseScheduleEnterSerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
+    EnterpriseValidationSerializer, EntrepriseAdminSerializer, EnterpriseCreateSerializer, \
+    EmployeeSerializer, CreateEmployeeSerializer, LeaveRequestSerializer, ModifyEmployeeDataRequestSerializer, PermissionRequestSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
     EmployeeRoomSerializer, QrSerializer, SecurityCodeSerializer, EnterpriseAdminRoleSerializer
 
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
@@ -62,7 +62,9 @@ class EnterpriseCreateWithoutRegisterView(APIView):
         operation_description="",
         request_body=EnterpriseCreateSerializerWithoutRegister
     )
+    
     def post(self, request, *args, **kwargs):
+        print("*"*100)
         serializer = EnterpriseCreateSerializerWithoutRegister(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.data.get("email")
@@ -70,7 +72,9 @@ class EnterpriseCreateWithoutRegisterView(APIView):
         users = Custom_User.objects.get(email=email)
         if users is not None:
             return Response({'msg': "This email has already used"}, status=status.HTTP_404_NOT_FOUND)
+
         else:
+            
             #Create User
             user = serializer.save()
             if user is not None:
@@ -187,9 +191,20 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
 
     
     def list(self, request):
+        # Get the enterprise create by user
         user_enterprises = Enterprise.objects.filter(creator=request.user)
-        serializer = EnterpriseSerializer(user_enterprises, many=True)
-        return Response({"enterprise":serializer.data, "msg": "success"}, status=status.HTTP_200_OK) 
+
+        # Get enterprise associate to the user
+        employee_enterprises = Employee.objects.filter(user=request.user).values_list('enterprise', flat=True)
+        employee_enterprises = Enterprise.objects.filter(pk__in=employee_enterprises)
+
+        # Let's combine all
+        all_user_enterprises = user_enterprises | employee_enterprises
+
+        serializer = EnterpriseSerializer(all_user_enterprises, many=True)
+
+        return Response({"enterprise": serializer.data, "msg": "success"}, status=status.HTTP_200_OK)
+
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -340,7 +355,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         employee = Employee(user=self.user_employee, is_active=False, enterprise=enterprise)
-        employee.save()
+        employee.save() 
 
         return Response({"employee": employee.id, "Enterprise": f"{EnterpriseSerializer(enterprise).data}","msg":"success"},
                         status=status.HTTP_201_CREATED)
@@ -815,3 +830,44 @@ class AccesModelCreateView(viewsets.ModelViewSet):
 
         return Response({'message': 'Liste des visages envoyée en temps réel'}, status=status.HTTP_200_OK) 
     
+    
+
+class LeaveRequestViewSet(viewsets.ModelViewSet):
+    queryset = LeaveRequest.objects.all()
+    serializer_class = LeaveRequestSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+
+
+class BreakRequestViewSet(viewsets.ModelViewSet):
+    queryset = BreakRequest.objects.all()
+    serializer_class = BreakRequestSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+    
+    
+class PermissionRequestViewSet(viewsets.ModelViewSet):
+    queryset = PermissionRequest.objects.all()
+    serializer_class = PermissionRequestSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+    
+
+class DocumentCopyRequestViewSet(viewsets.ModelViewSet):
+    queryset = DocumentCopyRequest.objects.all()
+    serializer_class = DocumentCopyRequestSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+     
+     
+class ModifyEmployeeDataRequestViewSet(viewsets.ModelViewSet):
+    queryset = ModifyEmployeeDataRequest.objects.all()
+    serializer_class = ModifyEmployeeDataRequestSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+     
+
+class EnterpriseScheduleEnterViewSet(viewsets.ModelViewSet):
+    queryset = EnterpriseScheduleEnter.objects.all()
+    serializer_class = EnterpriseScheduleEnterSerializer
+

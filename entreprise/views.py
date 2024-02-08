@@ -772,7 +772,7 @@ class EnterpriseAdminViewSet(viewsets.ModelViewSet):
     queryset = EnterpriseAdmin.objects.all()
     serializer_class = EntrepriseAdminSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
 
 class EconomicSectorViewSet(viewsets.ModelViewSet):

@@ -148,13 +148,13 @@ class EnterpriseAdmin(models.Model):
     __metaclass__ = ModelBasic
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
-    job = models.CharField(max_length=100)
-    job_description = models.CharField(max_length=100)
-    enterprises = models.ManyToManyField(Enterprise)
-    roles = models.OneToOneField(Role, on_delete=models.CASCADE, default=1)
+    job = models.CharField(max_length=100,default = "String")
+    job_description = models.CharField(max_length=100,default = "String")
+    enterprises = models.ManyToManyField(Enterprise,)
+    roles = models.ManyToManyField(Role)
 
     def __str__(self):
-        return f"{self.user}" 
+        return f"The employee n°{self.employee} is admin" 
 
 
 ################################# Entreprise admin rôle     ################################"

@@ -55,7 +55,8 @@ class UserRegistrationView(generics.CreateAPIView):
 
                 # Recherchez un secteur par défaut existant dans la base de données
                 default_sector = EconomicSector.objects.filter(sectorname="Default Sector").first()
-             
+
+                
 
                 # Créez l'entreprise avec le secteur par défaut
                 if user and user.id and default_sector:

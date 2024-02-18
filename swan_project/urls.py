@@ -24,7 +24,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-from entreprise.views import AccesModelCreateView, BreakRequestViewSet, DocumentCopyRequestViewSet, EconomicSectorViewSet, EnterpriseScheduleEnterViewSet, EnterpriseViewSet, EmployeeViewSet, LeaveRequestViewSet, ModifyEmployeeDataRequestViewSet, PermissionRequestViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
+from entreprise.views import AccesModelCreateView, BreakRequestViewSet, DocumentCopyRequestViewSet, EconomicSectorViewSet, EnterpriseScheduleEnterViewSet, EnterpriseViewSet, EmployeeViewSet, LeaveRequestViewSet, ModifyEmployeeDataRequestViewSet, PermissionRequestViewSet, RoleViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
 from entreprise import consumers
 
 
@@ -57,6 +57,9 @@ EnterpriseAdmin_router.register(r"Enterprise",     EnterpriseAdminViewSet, basen
 
 router = DefaultRouter()
 router.register(r'economicsectors', EconomicSectorViewSet, basename='economicsector')
+
+role_router = DefaultRouter()
+role_router.register(r'role', RoleViewSet, basename='Role') 
 
 access_router = DefaultRouter()
 access_router.register(r"", AccesModelCreateView, basename="Access")
@@ -101,6 +104,8 @@ urlpatterns = [
     #path('employee/', include(Employee_router.urls), name="Security Code"),
     path('request/', include(router.urls)),
     path('schedule/', include(schedul_router.urls)),
+    path('role/', include(role_router.urls)),
+
 
     path('room/', include(room_router.urls), name="Rooms"),
     path('employee_room/', include(employee_room_router.urls), name="Employee room"),

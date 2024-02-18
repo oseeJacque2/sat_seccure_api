@@ -1,5 +1,5 @@
 from entreprise.utils import check_access
-from .models import AccesModel, BreakRequest, Country, DocumentCopyRequest, EconomicSector, EnterpriseAdmin, Enterprise, Employee, EnterpriseScheduleEnter, Face, LeaveRequest, ModifyEmployeeDataRequest, PermissionRequest, Room, EmployeeRoom, Qr, SecurityCode, \
+from .models import AccesModel, BreakRequest, Country, DocumentCopyRequest, EconomicSector, EnterpriseAdmin, Enterprise, Employee, EnterpriseScheduleEnter, Face, LeaveRequest, ModifyEmployeeDataRequest, PermissionRequest, Role, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
 from rest_framework import serializers
 from django.db import models
@@ -502,3 +502,7 @@ class EnterpriseScheduleEnterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RoleSerializer(serializers.ModelSerializer): 
+    class Meta:
+        model = Role 
+        fields = '__all__'

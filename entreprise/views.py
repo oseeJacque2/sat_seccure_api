@@ -18,12 +18,12 @@ import qrcode
 from urllib.parse import urljoin
 from swan_project import settings
 
-from .models import  AccesModel, BreakRequest, Country, DocumentCopyRequest, EconomicSector, Enterprise, EnterpriseAdmin, Employee, EnterpriseScheduleEnter, Face, LeaveRequest, ModifyEmployeeDataRequest, PermissionRequest, Room, EmployeeRoom, Qr, SecurityCode, \
+from .models import  AccesModel, BreakRequest, Country, DocumentCopyRequest, EconomicSector, Enterprise, EnterpriseAdmin, Employee, EnterpriseScheduleEnter, Face, LeaveRequest, ModifyEmployeeDataRequest, PermissionRequest, Role, Room, EmployeeRoom, Qr, SecurityCode, \
     EnterpriseAdminRole
     
 from .serializers import AccesModelSerializer, AddEnterpriseDocumentsSerializer, BreakRequestSerializer, CompletEnterpiseInformationSerializer, CountrySerializer, DocumentCopyRequestSerializer, EconomicSectorSerializer, EnterpriseScheduleEnterSerializer, EnterpriseSerializer, EnterpriseCreateSerializerWithoutRegister, \
     EnterpriseValidationSerializer, EntrepriseAdminSerializer, EnterpriseCreateSerializer, \
-    EmployeeSerializer, CreateEmployeeSerializer, LeaveRequestSerializer, ModifyEmployeeDataRequestSerializer, PermissionRequestSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
+    EmployeeSerializer, CreateEmployeeSerializer, LeaveRequestSerializer, ModifyEmployeeDataRequestSerializer, PermissionRequestSerializer, RoleSerializer, UpdateEmployeeSerializer, FacesSerializer, RoomSerializer, \
     EmployeeRoomSerializer, QrSerializer, SecurityCodeSerializer, EnterpriseAdminRoleSerializer
 
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
@@ -764,7 +764,7 @@ class EnterpriseAdminRoleViewSet(viewsets.ModelViewSet):
     queryset = EnterpriseAdminRole.objects.all()
     serializer_class = EnterpriseAdminRoleSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
 
 #########################################  EnterpriseAdmin Serializer #####################################
@@ -869,5 +869,9 @@ class ModifyEmployeeDataRequestViewSet(viewsets.ModelViewSet):
 
 class EnterpriseScheduleEnterViewSet(viewsets.ModelViewSet):
     queryset = EnterpriseScheduleEnter.objects.all()
-    serializer_class = EnterpriseScheduleEnterSerializer
+    serializer_class = EnterpriseScheduleEnterSerializer 
+    
 
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer 

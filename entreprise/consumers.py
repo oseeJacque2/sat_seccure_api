@@ -49,7 +49,6 @@ class CameraConsumer(AsyncWebsocketConsumer):
             try:
                 cap = cv2.VideoCapture('http://192.168.100.3:8080/video')
                 _, frame = cap.read()
-                cap.release()
                 face_image = await detect_face(frame)
                 if face_image is not None:
                     similarity_threshold = 0.7
@@ -105,18 +104,28 @@ class CameraConsumer(AsyncWebsocketConsumer):
                 await asyncio.sleep(0.1)  # Add a short sleep
 
             except Exception as e:
-                await self.send(text_data=json.dumps({'error': str(e)})) 
+                await self.send(text_data=json.dumps({'error': str(e)}))  
+                
+            finally: 
+                cap.release()
                 
 
-@sync_to_async
+@database_sync_to_async
 def get_qr_objects(content):
-    qr_object = Qr.objects.get(qr_code=content)
-    #print("*"*10)
-    #print(qr_object.employee)
-    #print("a"*10)
-    return qr_object
+    try:
+        qr_objects = Qr.objects.filter(qr_code=content)
+        if qr_objects.exists():
+            return qr_objects.first()
+        else:
+            return None
+    except Qr.DoesNotExist:
+        return None
 
-@sync_to_async
+
+@database_sync_to_async
 def get_employeeroom_for_employee(employee_id):
-    return EmployeeRoom.objects.filter(employee=employee_id)
-            
+    try:
+        employee_rooms = EmployeeRoom.objects.filter(employee=employee_id)
+        return list(employee_rooms)
+    except EmployeeRoom.DoesNotExist:
+        return []           

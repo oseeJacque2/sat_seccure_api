@@ -672,9 +672,8 @@ class QrViewset(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         user = request.user
         employee_id = request.data.get("employee")
-        
+        qr_content = request.data.get("qr_code")
         try:
-            qr_content = request.data.get("qr_code", "")
             
             qr = qrcode.QRCode(
                 version=1,
@@ -684,7 +683,6 @@ class QrViewset(viewsets.ModelViewSet):
             )
             qr.add_data(qr_content)
             qr.make(fit=True)
-            
             img = qr.make_image(fill_color="black", back_color="white")
 
             buffer = BytesIO()
@@ -784,51 +782,12 @@ class EconomicSectorViewSet(viewsets.ModelViewSet):
 
 
 ################################################################# Access View ############################## 
-class AccesModelCreateView(viewsets.ModelViewSet):
+class AccesModelView(viewsets.ModelViewSet):
     queryset = AccesModel.objects.all()
     serializer_class = AccesModelSerializer
+    permission_classes = [IsAuthenticated]
     parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
     
-    @action(detail=True,methods=['get'])
-    def get_access_real_time(self, request, *args, **kwargs):
-        # Ouvrir la caméra de l'ordinateur 
-        faces = Face.objects.all()
-        cap = cv2.VideoCapture(0)
-
-        while cap.isOpened():
-            # Lire une frame depuis la caméra
-            ret, frame = cap.read()
-
-            # Convertir la frame en format base64
-            _, img_encoded = cv2.imencode('.png', frame)
-            data = base64.b64encode(img_encoded.tobytes()).decode('utf-8')
-            for face in faces:
-                pass
-            
-            # Envoyer la frame en temps réel
-            self.send_frame(data)
-            
-            return Response({'message': 'Liste des visages envoyée en temps réel'}, status=status.HTTP_200_OK)
-
-        # Libérer la capture lorsque la caméra est éteinte
-        cap.release()
-        
-        return Response({'message': 'Liste des visages envoyée en temps réel 222222478'}, status=status.HTTP_200_OK)
-
-    def send_frame(self, data):
-        pass
-
-    def post(self, request, *args, **kwargs):
-        # Lorsqu'une capture est demandée, prendre la liste des visages dans la table Faces
-        faces = Face.objects.all()
-
-        # Envoyer la liste des visages en temps réel au frontend (à implémenter)
-        # Vous pouvez utiliser une connexion WebSocket pour envoyer les données
-        # Assurez-vous que le frontend est prêt à recevoir et à afficher la liste des visages
-
-        # Ajouter la logique pour prendre la capture ici si nécessaire
-
-        return Response({'message': 'Liste des visages envoyée en temps réel'}, status=status.HTTP_200_OK) 
     
     
 
@@ -836,21 +795,35 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
     queryset = LeaveRequest.objects.all()
     serializer_class = LeaveRequestSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser)
 
+    @action(detail=False, methods=['GET'])
+    def by_enterprise(self, request):
+        # Récupérez l'ID de l'entreprise à partir des paramètres de requête
+        enterprise_id = request.query_params.get('enterprise_id')
+
+        if not enterprise_id:
+            return Response({'error': 'Paramètre enterprise_id manquant'}, status=400)
+
+        # Filtrez les requêtes par entreprise
+        queryset = self.get_queryset().filter(enterprise_id=enterprise_id)
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data) 
+    
 
 class BreakRequestViewSet(viewsets.ModelViewSet):
     queryset = BreakRequest.objects.all()
     serializer_class = BreakRequestSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
     
     
 class PermissionRequestViewSet(viewsets.ModelViewSet):
     queryset = PermissionRequest.objects.all()
     serializer_class = PermissionRequestSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
+    #parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.FileUploadParser) 
     
 
 class DocumentCopyRequestViewSet(viewsets.ModelViewSet):

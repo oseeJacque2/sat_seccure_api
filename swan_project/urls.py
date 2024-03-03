@@ -24,7 +24,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-from entreprise.views import AccesModelCreateView, BreakRequestViewSet, DocumentCopyRequestViewSet, EconomicSectorViewSet, EnterpriseScheduleEnterViewSet, EnterpriseViewSet, EmployeeViewSet, LeaveRequestViewSet, ModifyEmployeeDataRequestViewSet, PermissionRequestViewSet, RoleViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
+from entreprise.views import AccesModelView, BreakRequestViewSet, DocumentCopyRequestViewSet, EconomicSectorViewSet, EnterpriseScheduleEnterViewSet, EnterpriseViewSet, EmployeeViewSet, LeaveRequestViewSet, ModifyEmployeeDataRequestViewSet, PermissionRequestViewSet, RoleViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
 from entreprise import consumers
 
 
@@ -62,7 +62,8 @@ role_router = DefaultRouter()
 role_router.register(r'role', RoleViewSet, basename='Role') 
 
 access_router = DefaultRouter()
-access_router.register(r"", AccesModelCreateView, basename="Access")
+access_router.register(r"employee_access", AccesModelView, basename="Access")
+
 router = DefaultRouter()
 router.register(r'leave-request', LeaveRequestViewSet, basename='leave-request')
 router.register(r'break-request', BreakRequestViewSet, basename='break-request')

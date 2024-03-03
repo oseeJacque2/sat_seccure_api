@@ -265,11 +265,11 @@ class LeaveRequest(models.Model,ModelBasic):
     leave_type = models.CharField(max_length=20, choices=LEAVE_TYPES, default = "Sick Leave") 
     reason = models.TextField()
     start_at = models.DateField()
-    end_at = models.DateField() 
+    end_at = models.DateField()
     is_approuve = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"Permission Request #{self.id}" 
+        return f"Permission Request #{self.leave_type}" 
     
     
 ################################  Break Request  (Pause) ################################

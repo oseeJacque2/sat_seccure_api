@@ -290,84 +290,84 @@ class QrSerializer(serializers.ModelSerializer):
         model = Qr
         fields = ["is_current","qr_code","employee"] 
         
-    def validate(self,data): 
-        user = self.context['request'].user
-        request_method = self.context['request'].method
-        if request_method == "put" or request_method == "patch" or request_method == "delete" or \
-                request_method == "post":
-            try:
-                system_admin = SystemAdmin.objects.get(user_admin=user)
-                qr_content = read_qr_code(image_path=data.get("qr_image"))
-                print(qr_content)
-                if qr_content == data.get("qr_code"):
-                    return data
-                else:
-                    raise serializers.ValidationError("Qr content not conform to qr code")
-            except SystemAdmin.DoesNotExist:
-                try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
-                    qr_content = read_qr_code(image_path=data.get("qr_image"))
-                    print(qr_content)
-                    if qr_content == data.get("qr_code"):
-                        return data
-                    else:
-                        raise serializers.ValidationError("Qr content not conform to qr code")
-                except Enterprise.DoesNotExist:
-                    try:
-                        entreprise_admin = EnterpriseAdmin.objects.get(user=user)
-                        try:
-                            enterprise_admin_role = EnterpriseAdminRole.objects.get(
-                                entreprise_admin=entreprise_admin,
-                                role='manage employee qr_code')
-                            qr_content = read_qr_code(image_path=data.get("qr_image"))
-                            print(qr_content)
-                            if qr_content == data.get("qr_code"):
-                                return data
-                            else:
-                                raise serializers.ValidationError("Qr content not conform to qr code")
-                        except EnterpriseAdminRole.DoesNotExist:
-                            raise serializers.ValidationError("Yu have not permission to do this task")
-                    except EnterpriseAdmin.DoesNotExist:
-                        raise serializers.ValidationError("You have not permission to this action")
-        else:
-            try:
-                system_admin = SystemAdmin.objects.get(user_admin=user)
-                qr_content = read_qr_code(image_path=data.get("qr_image"))
-                print(qr_content)
-                if qr_content == data.get("qr_code"):
-                    return data
-                else:
-                    raise serializers.ValidationError("Qr content not conform to qr code")
-            except SystemAdmin.DoesNotExist:
-                try:
-                    entreprise_creatrice = Enterprise.objects.get(creator=user)
-                    qr_content = read_qr_code(image_path=data.get("qr_image"))
-                    print(qr_content)
-                    if qr_content == data.get("qr_code"):
-                        return data
-                    else:
-                        raise serializers.ValidationError("Qr content not conform to qr code")
-                except Enterprise.DoesNotExist:
-                    try:
-                        entreprise_admin = EnterpriseAdmin.objects.get(user=user)
-                        try:
-                            enterprise_admin_role = EnterpriseAdminRole.objects.get(
-                                entreprise_admin=entreprise_admin,
-                                role='manage employee security code')
-                            return data
-                        except EnterpriseAdminRole.DoesNotExist:
-                            raise serializers.ValidationError("You have not permission to do this task")
-                    except EnterpriseAdmin.DoesNotExist:
-                        try:
-                            employee = SecurityCode.objects.get(employee=user)
-                            qr_content = read_qr_code(image_path=data.get("qr_image"))
-                            print(qr_content)
-                            if qr_content == data.get("qr_code"):
-                                return data
-                            else:
-                                raise serializers.ValidationError("Qr content not conform to qr code")
-                        except SecurityCode.DoesNotExist:
-                            raise serializers.ValidationError("Yu have not permission to do this task")
+    # def validate(self,data): 
+    #     user = self.context['request'].user
+    #     request_method = self.context['request'].method
+    #     if request_method == "put" or request_method == "patch" or request_method == "delete" or \
+    #             request_method == "post":
+    #         try:
+    #             system_admin = SystemAdmin.objects.get(user_admin=user)
+    #             qr_content = read_qr_code(image_path=data.get("qr_image"))
+    #             print(qr_content)
+    #             if qr_content == data.get("qr_code"):
+    #                 return data
+    #             else:
+    #                 raise serializers.ValidationError("Qr content not conform to qr code")
+    #         except SystemAdmin.DoesNotExist:
+    #             try:
+    #                 entreprise_creatrice = Enterprise.objects.get(creator=user)
+    #                 qr_content = read_qr_code(image_path=data.get("qr_image"))
+    #                 print(qr_content)
+    #                 if qr_content == data.get("qr_code"):
+    #                     return data
+    #                 else:
+    #                     raise serializers.ValidationError("Qr content not conform to qr code")
+    #             except Enterprise.DoesNotExist:
+    #                 try:
+    #                     entreprise_admin = EnterpriseAdmin.objects.get(user=user)
+    #                     try:
+    #                         enterprise_admin_role = EnterpriseAdminRole.objects.get(
+    #                             entreprise_admin=entreprise_admin,
+    #                             role='manage employee qr_code')
+    #                         qr_content = read_qr_code(image_path=data.get("qr_image"))
+    #                         print(qr_content)
+    #                         if qr_content == data.get("qr_code"):
+    #                             return data
+    #                         else:
+    #                             raise serializers.ValidationError("Qr content not conform to qr code")
+    #                     except EnterpriseAdminRole.DoesNotExist:
+    #                         raise serializers.ValidationError("Yu have not permission to do this task")
+    #                 except EnterpriseAdmin.DoesNotExist:
+    #                     raise serializers.ValidationError("You have not permission to this action")
+    #     else:
+    #         try:
+    #             system_admin = SystemAdmin.objects.get(user_admin=user)
+    #             qr_content = read_qr_code(image_path=data.get("qr_image"))
+    #             print(qr_content)
+    #             if qr_content == data.get("qr_code"):
+    #                 return data
+    #             else:
+    #                 raise serializers.ValidationError("Qr content not conform to qr code")
+    #         except SystemAdmin.DoesNotExist:
+    #             try:
+    #                 entreprise_creatrice = Enterprise.objects.get(creator=user)
+    #                 qr_content = read_qr_code(image_path=data.get("qr_image"))
+    #                 print(qr_content)
+    #                 if qr_content == data.get("qr_code"):
+    #                     return data
+    #                 else:
+    #                     raise serializers.ValidationError("Qr content not conform to qr code")
+    #             except Enterprise.DoesNotExist:
+    #                 try:
+    #                     entreprise_admin = EnterpriseAdmin.objects.get(user=user)
+    #                     try:
+    #                         enterprise_admin_role = EnterpriseAdminRole.objects.get(
+    #                             entreprise_admin=entreprise_admin,
+    #                             role='manage employee security code')
+    #                         return data
+    #                     except EnterpriseAdminRole.DoesNotExist:
+    #                         raise serializers.ValidationError("You have not permission to do this task")
+    #                 except EnterpriseAdmin.DoesNotExist:
+    #                     try:
+    #                         employee = SecurityCode.objects.get(employee=user)
+    #                         qr_content = read_qr_code(image_path=data.get("qr_image"))
+    #                         print(qr_content)
+    #                         if qr_content == data.get("qr_code"):
+    #                             return data
+    #                         else:
+    #                             raise serializers.ValidationError("Qr content not conform to qr code")
+    #                     except SecurityCode.DoesNotExist:
+    #                         raise serializers.ValidationError("Yu have not permission to do this task")
 
 
 ################################ Security code Serializer ##########################################"""
@@ -505,4 +505,5 @@ class EnterpriseScheduleEnterSerializer(serializers.ModelSerializer):
 class RoleSerializer(serializers.ModelSerializer): 
     class Meta:
         model = Role 
-        fields = '__all__'
+        fields = '__all__' 
+        

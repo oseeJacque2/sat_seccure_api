@@ -43,7 +43,7 @@ def detect_qr_code(image_array):
 
     # Si des codes QR sont détectés, retourner le premier code QR et True
     if decoded_objects:
-        qr_content = decoded_objects[0].data.decode('utf-8')
+        qr_content = decoded_objects[0].data.decode('utf-8') 
         return True, qr_content
     else:
         # Sinon, retourner False et une chaîne vide

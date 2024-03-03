@@ -8,13 +8,13 @@ from asgiref.sync import sync_to_async
 #Detect face from image function
 @sync_to_async
 def detect_face(image):
-    """Detects a face in an image and flips the image with the framed face.
+    """Detects a face in an image and returns the grayscale face image.
 
     Args:
-        image (numpy.array): Enter Image
+        image (numpy.array): Input image
 
     Returns:
-        numpy.array: Image with the framed face
+        numpy.array: Grayscale face image
     """
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
     faces = face_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
@@ -26,7 +26,10 @@ def detect_face(image):
     else:
         (x, y, w, h) = faces[0]
         face_roi = image[y:y + h, x:x + w]
-        return face_roi
+        # Convertir l'image en niveaux de gris
+        face_gray = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
+        return face_gray
+
 
   
     

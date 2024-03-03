@@ -85,7 +85,7 @@ TEMPLATES = [
 # Daphne
 ASGI_APPLICATION = "swan_project.asgi.application"
 WSGI_APPLICATION = 'swan_project.wsgi.application'
-
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

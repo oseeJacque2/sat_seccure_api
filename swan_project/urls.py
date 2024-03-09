@@ -55,8 +55,8 @@ EnterpriseAdminRole_router.register(r"Enterprise", EnterpriseAdminRoleViewSet, b
 EnterpriseAdmin_router = DefaultRouter()
 EnterpriseAdmin_router.register(r"Enterprise",     EnterpriseAdminViewSet, basename="EnterpriseAdmin")
 
-router = DefaultRouter()
-router.register(r'economicsectors', EconomicSectorViewSet, basename='economicsector')
+router_economic = DefaultRouter()
+router_economic.register(r'economicsectors', EconomicSectorViewSet, basename='economicsector')
 
 role_router = DefaultRouter()
 role_router.register(r'role', RoleViewSet, basename='Role') 
@@ -70,6 +70,7 @@ router.register(r'break-request', BreakRequestViewSet, basename='break-request')
 router.register(r'permission-request', PermissionRequestViewSet, basename='permission-request')
 router.register(r'document-copy-request', DocumentCopyRequestViewSet, basename='document-copy-request')
 router.register(r'modify-employee-data-request', ModifyEmployeeDataRequestViewSet, basename='modify-employee-data-request')
+
 schedul_router = DefaultRouter()
 
 schedul_router.register(r'enterprise-schedules-enter', EnterpriseScheduleEnterViewSet, basename='Schedule')
@@ -114,7 +115,7 @@ urlpatterns = [
     path('security_Code/', include(SecurityCode_router.urls), name="Security Code"),
     path('enterprise_admin_role/', include(EnterpriseAdminRole_router.urls), name="Enterprise Admin Role"),
     path('enterprise_admin/', include(EnterpriseAdmin_router.urls), name="Enterprise Admin "), 
-    path('economie/', include(router.urls), name= "Economic Sector activityg"),
+    path('economie/', include(router_economic.urls), name= "Economic Sector activityg"),
     path('acces/', include(access_router.urls), name="Access"), 
     #path('acces/stream/', AccesModelCreateView.as_view({'get': 'get_access_real_time'}), name= "Access information real time"), 
     re_path(r'ws/camera/', consumers.CameraConsumer.as_asgi(), name='camera_ws'),

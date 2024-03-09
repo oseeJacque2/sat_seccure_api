@@ -19,6 +19,8 @@ continent_choices = [
 CARD_TYPES = [
         ('PASSPORT', 'Passport'),
         ('CNI', 'CNI'),
+        ('CIP', 'CIP'),
+        ("AUTRES","AUTRES")
     ]
 
 role_type_choices = [

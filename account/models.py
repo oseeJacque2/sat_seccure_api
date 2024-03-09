@@ -5,8 +5,8 @@ from django.utils import timezone
 
 SEXE_CHOICES=(
     ("HOMME", "HOMME"),
-    ("FEMMME", "FEMME"),
-    ("AUCUN", "AUCUN")
+    ("FEMME", "FEMME"),
+    ("AUTRES", "AUTRES")
 )
 
 

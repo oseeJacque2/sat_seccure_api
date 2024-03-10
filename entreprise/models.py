@@ -30,8 +30,8 @@ role_type_choices = [
 
 SEXE_CHOICES=(
     ("HOMME", "HOMME"),
-    ("FEMMME", "FEMME"),
-    ("AUCUN", "AUCUN")
+    ("FEMME", "FEMME"),
+    ("AUTRES","AUTRES")
 )
 
 ACCESS_MODE = [

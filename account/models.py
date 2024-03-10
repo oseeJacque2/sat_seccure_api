@@ -6,7 +6,7 @@ from django.utils import timezone
 SEXE_CHOICES=(
     ("HOMME", "HOMME"),
     ("FEMME", "FEMME"),
-    ("AUTRES", "AUTRES")
+    ("AUTRES","AUTRES")
 )
 
 
@@ -68,7 +68,7 @@ class Custom_User(AbstractUser, PermissionsMixin):
     name = models.CharField(max_length=255, default="String")
     firstname = models.CharField(max_length=255,default="String")
     username = models.CharField(max_length=255,default="String")
-    sexe = models.CharField(max_length=15, choices=SEXE_CHOICES, default="AUCUN")
+    sexe = models.CharField(max_length=15, choices=SEXE_CHOICES, default="HOMME")
     telephone = models.CharField(max_length=20, default="")
     picture = models.ImageField(default="default.png",  upload_to='statics/')
 

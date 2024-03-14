@@ -54,7 +54,7 @@ class UserRegistrationView(generics.CreateAPIView):
                 user = serializer.save()
 
                 # Recherchez un secteur par défaut existant dans la base de données
-                default_sector = EconomicSector.objects.filter(sectorname="Default Sector").first()
+                default_sector = EconomicSector.objects.all().first()
 
                 
 

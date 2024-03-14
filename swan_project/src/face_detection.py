@@ -28,7 +28,35 @@ def detect_face(image):
         face_roi = image[y:y + h, x:x + w]
         # Convertir l'image en niveaux de gris
         face_gray = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
+        return face_gray 
+    
+
+def detect_face2(image):
+    """Detects a face in an image and returns the grayscale face image.
+
+    Args:
+        image (numpy.array): Input image
+
+    Returns:
+        numpy.array: Grayscale face image
+    """
+
+    # Charger le classificateur en cascade Haar pour la détection de visage
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
+    # Effectuer la détection de visage
+    faces = face_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    
+    if len(faces) == 0:
+        return None
+    elif len(faces) > 1:
+        return []
+    else:
+        (x, y, w, h) = faces[0]
+        face_roi = image[y:y + h, x:x + w]
+        # Convertir l'image en niveaux de gris
+        face_gray = cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY)
         return face_gray
+
 
 
   

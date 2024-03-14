@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 
 from account.models import Custom_User
 
-from swan_project.src.face_detection import convert_image_to_numpy_array, detect_face
+from swan_project.src.face_detection import convert_image_to_numpy_array, detect_face, detect_face2
 
 from swan_project.src.verify_face import verify_face
 
@@ -221,7 +221,6 @@ class FacesSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("No face detect in image or We dectect more than 2 face in images. Please change the image")
 
         else:
-            print("One personne")
             face_verification = verify_face(employee=data.get('employee'), image=detect_face_result)
             if face_verification > 0.50:
                 return data

@@ -4,7 +4,7 @@ import cv2
 import face_recognition
 from entreprise.models import Face
 
-from swan_project.src.face_detection import detect_face
+from swan_project.src.face_detection import detect_face, detect_face2
 
 
 #from swan_project.swan_project.src.face_detection import detect_face
@@ -24,12 +24,13 @@ def verify_face(employee, image):
     """
     #Get all faces for employee
     employee_face = Face.objects.filter(employee=employee)
-    print(employee_face)
     if len(employee_face) == 0:
         return 100
     else:
         #Verify if we are a face in the image
-        face_dect = detect_face(image)
+
+        face_dect =  detect_face(image)
+
         if face_dect is None:
             print("No face detected in the image")
             return 0.0
@@ -40,6 +41,7 @@ def verify_face(employee, image):
                 print(know_image)
                 # Encoding the know image and the image to verify
                 face_encodings = face_recognition.face_encodings(know_image)
+
                 if len(face_encodings) > 0:
                     knows_images.append(face_encodings)
 
@@ -47,8 +49,12 @@ def verify_face(employee, image):
             known_encodings = knows_images
 
             # Convert the image to RGB
+
+            print(face_dect)
             rgb_image = cv2.cvtColor(face_dect, cv2.COLOR_BGR2RGB)
+
             image_encodings = face_recognition.face_encodings(rgb_image)
+
             if len(image_encodings) == 0:
                 return 0.0  # Return 0 similarity if no face is detected in the image
             image_encoding = image_encodings[0]  # Get the first face encoding

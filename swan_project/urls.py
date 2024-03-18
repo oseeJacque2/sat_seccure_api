@@ -22,7 +22,7 @@ from drf_yasg import openapi
 from rest_framework.routers import DefaultRouter
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from entreprise.views import AccesModelView, BreakRequestViewSet, DocumentCopyRequestViewSet, EconomicSectorViewSet, EnterpriseScheduleEnterViewSet, EnterpriseViewSet, EmployeeViewSet, LeaveRequestViewSet, ModifyEmployeeDataRequestViewSet, PermissionRequestViewSet, RoleViewSet, RoomViewset,EmployeeRoomViewset,QrViewset, SecurityCodeViewset, EnterpriseAdminRoleViewSet, EnterpriseAdminViewSet
 from entreprise import consumers
@@ -121,4 +121,5 @@ urlpatterns = [
     re_path(r'ws/camera/', consumers.CameraConsumer.as_asgi(), name='camera_ws'),
 
 
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+

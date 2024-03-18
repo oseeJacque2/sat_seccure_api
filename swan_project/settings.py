@@ -322,6 +322,7 @@ USE_TZ = True
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+
 STATIC_URL = 'static/'
 
 PROJECT_ROOT = os.path.normpath(os.path.dirname(__file__))
